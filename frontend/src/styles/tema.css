@@ -1,0 +1,21 @@
+:root {
+  color-scheme: light;
+  --color-fondo: #f6f5f1;
+  --color-superficie: #ffffff;
+  --color-texto: #252622;
+  --color-secundario: #60635d;
+  --color-marca: #9f2435;
+  --color-marca-suave: #f8e9ec;
+  --color-borde: #dedfd7;
+  --color-exito: #286344;
+  --color-foco: #1859ad;
+  --fuente: 'Segoe UI', system-ui, sans-serif;
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 0.75rem;
+  --espacio-4: 1rem;
+  --espacio-6: 1.5rem;
+  --espacio-8: 2rem;
+  --radio: 1rem;
+  --ancho-contenido: 72rem;
+}
