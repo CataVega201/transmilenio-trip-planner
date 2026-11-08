@@ -68,9 +68,20 @@ demuestra que el origen no las tuviera: podria existir una transformacion previa
 El validador se comprobo adicionalmente con una red temporal valida, eventos
 duplicados, horas 25:10 y errores deliberados de referencia y minutos.
 
-## Pendientes
+## Reproducción con el GTFS histórico
 
-Obtener el GTFS histórico y probar el conversor con ese archivo. Documentar fecha de servicio, alcance y diferencias frente a los CSV recibidos. Hasta entonces, la prueba realizada corresponde únicamente al ZIP de ejemplo.
+Se verificó el [GTFS del 14 de julio de 2021](https://storage.googleapis.com/gtfs-estaticos/GTFS-2021-07-14.zip) publicado en el almacenamiento del operador. Tamaño 56.688.605 bytes (54,1 MiB). SHA-256 del ZIP: `4ffc631354184c0994679dcda380603facfd5810d9d153ef9d83fed449059ff2`. Se eligió una fecha de servicio coincidente con esa publicación. También existe un archivo del 26 de julio. El material del curso no precisa cuál usó el profesor.
+
+Para repetir la ejecución, descarga el ZIP y elige una carpeta de salida nueva:
+
+```cmd
+.\.venv\Scripts\python.exe conversion/convertir_gtfs.py "%USERPROFILE%\Downloads\GTFS-2021-07-14.zip" comprobacion_julio --fecha 2021-07-14 --troncal
+.\.venv\Scripts\python.exe conversion/validar_csv.py comprobacion_julio
+```
+
+El modo `--troncal` usa las rutas clasificadas como TRONCAL por el archivo histórico. Sin estación padre, reconoce sufijos de plataforma como «C - 2 ó 5» o «T9». Dos plataformas consecutivas de una misma estación y viaje cuentan como una visita con la última salida. La agrupación por nombre es una decisión de conversión para este feed. Una visita no consecutiva repetida detiene la conversión. Cada secuencia de paradas distinta conserva su propio identificador para ofrecer solo viajes en el sentido real.
+
+`datos_generados/` contiene la salida real que validamos: 147 estaciones, 264 patrones de ruta, 2599 paradas en recorridos y 140532 eventos. `datos/` contiene los tres archivos enviados por Teams: 147 estaciones, 181 rutas y 140492 eventos. La coincidencia en cantidad de estaciones no demuestra una conversión idéntica. El script del profesor y sus criterios de selección siguen sin conocerse. El motor podrá recibir cualquiera de estas carpetas.
 
 Este codigo vive fuera de motor/: usa diccionarios y conjuntos para validar
 datos, tal como permite el enunciado fuera del motor. No debe importarse desde

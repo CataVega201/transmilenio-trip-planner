@@ -58,14 +58,18 @@ def normalizar(nombre):
                    if not unicodedata.combining(x)) for c in nombre)
 
 
-def recoger(zip_gtfs, fecha):
+def recoger(zip_gtfs, fecha, solo_troncal=False):
     activos = servicios_activos(zip_gtfs, fecha)
-    rutas = {f["route_id"] for f in filas(zip_gtfs, "routes.txt", "route_id")}
+    rutas = {f["route_id"]: f for f in filas(zip_gtfs, "routes.txt", "route_id")}
+    if solo_troncal and not any(f.get("route_desc") == "TRONCAL" for f in rutas.values()):
+        raise ValueError("El archivo no identifica rutas TRONCAL en route_desc")
     viajes = {}
     for f in filas(zip_gtfs, "trips.txt", "trip_id route_id service_id"):
         if f["service_id"] in activos:
             if f["route_id"] not in rutas or f["trip_id"] in viajes:
                 raise ValueError(f"Viaje con ruta desconocida o ID repetido: {f['trip_id']}")
+            if solo_troncal and rutas[f["route_id"]]["route_desc"] != "TRONCAL":
+                continue
             viajes[f["trip_id"]] = (f["route_id"], f.get("direction_id") or "X")
     for f in filas(zip_gtfs, "frequencies.txt", "trip_id", opcional=True):
         if f["trip_id"] in viajes:
@@ -80,6 +84,11 @@ def recoger(zip_gtfs, fecha):
         parada = paradas[f["stop_id"]]
         id_estacion = parada.get("parent_station") or parada["stop_id"]
         nombre = normalizar(paradas[id_estacion]["stop_name"])
+        if solo_troncal and not parada.get("parent_station"):
+            # El feed de 2021 codifica el vagón o plataforma como sufijo.
+            base = re.sub(r"\s+(?:[A-Z]\s*-\s*[0-9]+(?:\s+O\s+[0-9]+)?|T-?\d+\s*[A-Z]?)$", "", nombre)
+            if base != nombre:
+                nombre, id_estacion = base, "TRONCAL:" + base
         if not nombre or nombres.setdefault(nombre, id_estacion) != id_estacion:
             raise ValueError(f"Estaciones distintas con el mismo nombre o nombre vacío: {nombre!r}")
         hora = f["departure_time"] or f["arrival_time"]
@@ -92,8 +101,18 @@ def recoger(zip_gtfs, fecha):
     patrones = defaultdict(list)
     for viaje, eventos in por_viaje.items():
         eventos.sort()
+        if len({n for n, _, _ in eventos}) != len(eventos):
+            raise ValueError(f"Secuencia repetida: {viaje}")
+        if solo_troncal:
+            visitas = []
+            for evento in eventos:
+                if visitas and visitas[-1][1] == evento[1]:
+                    visitas[-1] = evento
+                else:
+                    visitas.append(evento)
+            eventos = visitas
         recorrido = tuple(nombre for _, nombre, _ in eventos)
-        if len(set(recorrido)) != len(recorrido) or len({n for n, _, _ in eventos}) != len(eventos):
+        if len(set(recorrido)) != len(recorrido):
             raise ValueError(f"Viaje {viaje}: estación o secuencia repetida; revisar el recorrido")
         patrones[(*viajes[viaje], recorrido)].append(eventos)
     return patrones
@@ -124,12 +143,12 @@ def escribir(carpeta, patrones):
                 h.writerows((etiqueta, nombre, hora) for _, nombre, hora in eventos)
 
 
-def convertir(archivo, destino, fecha):
+def convertir(archivo, destino, fecha, solo_troncal=False):
     destino = Path(destino)
     if destino.exists():
         raise ValueError("Elige una carpeta de salida nueva para conservar los datos existentes")
     with ZipFile(archivo) as zip_gtfs:
-        patrones = recoger(zip_gtfs, fecha)
+        patrones = recoger(zip_gtfs, fecha, solo_troncal)
     destino.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(dir=destino.parent) as temporal:
         carpeta = Path(temporal) / "resultado"
@@ -147,9 +166,10 @@ if __name__ == "__main__":
     parser.add_argument("zip", type=Path)
     parser.add_argument("salida", type=Path)
     parser.add_argument("--fecha", type=date.fromisoformat, required=True, metavar="AAAA-MM-DD")
+    parser.add_argument("--troncal", action="store_true", help="Solo servicios TRONCAL del GTFS de Bogotá")
     args = parser.parse_args()
     try:
-        resumen = convertir(args.zip, args.salida, args.fecha)
+        resumen = convertir(args.zip, args.salida, args.fecha, args.troncal)
     except (ValueError, KeyError, OSError, BadZipFile, csv.Error) as error:
         parser.exit(1, f"Conversión interrumpida: {error}\n")
     print(f"{resumen['rutas']} rutas, {resumen['estaciones']} estaciones, {resumen['horarios']} horarios")
