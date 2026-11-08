@@ -1,7 +1,24 @@
 # Validacion y conversion de datos
 
-Responsable: Catalina Vega. El conversor GTFS esta pendiente. Actualmente solo
-existe un validador de los tres CSV; no modifica ni corrige los archivos.
+Responsable: Catalina Vega. El conversor lee un ZIP GTFS estático y genera los tres CSV en una carpeta nueva. Usa Python sin instalaciones adicionales.
+
+## Ejecutar el conversor
+
+Desde la raíz del repositorio, sustituye la ruta del ZIP y la fecha por las del servicio que quieras convertir. Esta fecha es un ejemplo.
+
+```cmd
+.\.venv\Scripts\python.exe conversion/convertir_gtfs.py "ruta al archivo.zip" datos_generados --fecha 2021-07-01
+```
+
+Selecciona todos los viajes activos del día según calendar.txt y calendar_dates.txt. El alcance incluye todas las rutas activas del archivo. Usa la estación padre cuando existe, normaliza nombres y separa sentidos y variantes de paradas. El identificador combina route_id, direction_id (X si falta) y número de patrón. Cada evento usa la hora de salida o, si falta, la de llegada. Descarta los segundos y conserva las horas superiores a 23. Valida los resultados antes de crear la carpeta definitiva.
+
+Esta versión requiere horarios explícitos. Si encuentra servicios por frecuencia, horas sin especificar, estaciones ambiguas o un recorrido que repite una estación, se detiene con un mensaje. El equipo deberá decidir cómo representar esos casos si aparecen en el archivo histórico. La fecha exacta y el alcance usados para los CSV del profesor siguen pendientes de verificar.
+
+La prueba crea un ZIP temporal y ejecuta el mismo comando del usuario. Cubre calendario y excepciones, dos sentidos, estación padre, orden numérico, horas extendidas y protección de una salida existente. Referencia de los campos: [GTFS Schedule](https://gtfs.org/documentation/schedule/reference/).
+
+```cmd
+.\.venv\Scripts\python.exe -m unittest discover -s conversion -p "test_*.py" -v
+```
 
 Desde la raiz del repositorio, para revisar los archivos de la carpeta superior:
 
@@ -53,10 +70,7 @@ duplicados, horas 25:10 y errores deliberados de referencia y minutos.
 
 ## Pendientes
 
-Obtener o identificar el GTFS fuente y, si existe, el script que produjo los
-CSV actuales. Definir dia de servicio, sentidos, patrones y normalizacion con
-esa evidencia. Implementar la conversion reproducible y sus pruebas antes de
-presentar estos archivos como datos definitivos de entrega.
+Obtener el GTFS histórico y probar el conversor con ese archivo. Documentar fecha de servicio, alcance y diferencias frente a los CSV recibidos. Hasta entonces, la prueba realizada corresponde únicamente al ZIP de ejemplo.
 
 Este codigo vive fuera de motor/: usa diccionarios y conjuntos para validar
 datos, tal como permite el enunciado fuera del motor. No debe importarse desde
