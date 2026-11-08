@@ -16,10 +16,7 @@ Alejandro Curtidor y Daniel Rincon.
 
 ## Estado real del proyecto
 
-React y Vite funcionan. Flask responde en `/api/estado` y la pagina comprueba
-la conexion con Python. El motor R1 a R10, la conversion GTFS, el panel R11 y
-la interfaz final estan pendientes. Las guias describen el trabajo previsto;
-no certifican que esos requisitos esten implementados.
+React y Flask funcionan en main. El progreso de cada rama y las dependencias para integrar el motor se encuentran en la [guía general](docs/GUIA_GENERAL.md). Las pruebas del conversor ya incluyen el GTFS real de julio de 2021. Cada integrante debe revisar e integrar los cambios del equipo antes de usar esas funciones desde main.
 
 ## Ejecutar la base actual
 

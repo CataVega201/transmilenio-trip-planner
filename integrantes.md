@@ -18,6 +18,7 @@ Todos deben poder explicar un requisito ajeno para la sustentacion.
 
 - Catalina: configuracion de archivos ignorados (`e70a636`), base React y Vite
   (`8d6145b`), servidor Flask y conexion web (`44c5e03`).
+- Catalina, trabajo en revisión: índice R4 y pruebas ([PR #3](https://github.com/CataVega201/transmilenio-trip-planner/pull/3)), conversión real y validación ([PR #4](https://github.com/CataVega201/transmilenio-trip-planner/pull/4)), tema visual (c34934b) y consultas y viajes ([PR #6](https://github.com/CataVega201/transmilenio-trip-planner/pull/6)).
 - Daniel: pendientes de registrar.
 - Mariana: pendientes de registrar.
 - Alejandro: pendientes de registrar.

@@ -5,22 +5,21 @@ se prepara el equipo; despues cada persona trabaja en sus archivos, prueba su
 parte y la entrega mediante una solicitud de revision en GitHub. No hay que
 esperar a que todos esten conectados para programar.
 
-## 1. Lo que ya funciona y lo que falta
+## 1. Estado del trabajo al 8 de noviembre
 
-| Parte | Estado comprobado |
-| --- | --- |
-| Git y repositorio | Configurados en el equipo de Catalina; cada companero debe configurar su propio equipo |
-| React y Vite | Pagina inicial operativa y compilacion correcta |
-| Flask | `servidor.py`, puerto 5000, `GET /api/estado` |
-| Conexion | React consulta `/api/estado` mediante el proxy de Vite |
-| Motor y pruebas del curso | Pendientes; no existe aun el paquete `motor/` |
-| Datos | Hay CSV en la carpeta superior del equipo de Catalina; aun no se han validado ni incorporado al repositorio |
-| Conversion GTFS | Pendiente; no se dispone aqui del ZIP fuente validado |
-| Interfaz final y panel | Pendientes |
-| Un solo comando para arrancar | Pendiente; por ahora son dos terminales |
+Los avances siguientes están en ramas de revisión. Se vuelven accesibles desde main cuando otro integrante revisa y el equipo integra la PR correspondiente.
 
-No se entrega una pantalla de prueba como producto terminado. El proyecto debe
-funcionar con otra carpeta de CSV y no depender de los nombres de nuestra red.
+| Avance | Dónde revisarlo | Pendiente |
+| --- | --- | --- |
+| Base local, React, Flask y conexión | main | Comando único a cargo de Daniel |
+| Guías individuales y acuerdos | docs/guias-equipo | Revisión del equipo |
+| Tema y pantalla adaptable | catalina/tema-web | Revisión visual del equipo |
+| Índice R4 y decisiones | [PR #3](https://github.com/CataVega201/transmilenio-trip-planner/pull/3) | Probar con TablaHash de Mariana y Red de Alejandro |
+| Conversión real y CSV | [PR #4](https://github.com/CataVega201/transmilenio-trip-planner/pull/4) | Revisar el alcance troncal y la regla de plataformas |
+| Consultas, viajes y adaptador Flask | [PR #6](https://github.com/CataVega201/transmilenio-trip-planner/pull/6) | Integrar con los módulos reales y componentes de Daniel |
+| R1–R3, R5–R9, R10 y panel R11 | Guías de Mariana, Alejandro y Daniel | Implementación por sus responsables |
+
+La conversión incluye datos/ con los CSV del profesor y datos_generados/ con la salida del GTFS real. La PR #6 tiene como base la rama del tema visual. Primero se integra el tema en main y después se comprueba que la PR #6 tenga main como base antes de integrarla.
 
 ## 2. Orden para una persona que empieza
 
