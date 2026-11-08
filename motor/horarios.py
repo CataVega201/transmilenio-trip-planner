@@ -93,3 +93,47 @@ def _buscar_siguiente(horarios, minuto):
     if izquierda == len(horarios):
         return None
     return horarios[izquierda]
+
+
+class IndiceHorarios:
+    """Índice por estación y ruta; los nombres llegan normalizados desde Red."""
+
+    def __init__(self, filas, *, crear_tabla=None):
+        if crear_tabla is None:
+            from .tabla_hash import TablaHash
+            crear_tabla = TablaHash
+        self._estaciones = crear_tabla()
+        grupos = []
+        for ruta, estacion, hora in filas:
+            rutas = self._estaciones.obtener(estacion)
+            if rutas is None:
+                rutas = crear_tabla()
+                self._estaciones.guardar(estacion, rutas)
+            horarios = rutas.obtener(ruta)
+            if horarios is None:
+                horarios = []
+                rutas.guardar(ruta, horarios)
+                grupos.append(horarios)
+            horarios.append(hora_a_minutos(hora))
+        for horarios in grupos:
+            _ordenar_horarios(horarios)
+
+    def _horarios(self, estacion, ruta):
+        rutas = self._estaciones.obtener(estacion)
+        if rutas is None:
+            return None
+        return rutas.obtener(ruta)
+
+    def siguiente(self, estacion, ruta, hora):
+        minuto = hora_a_minutos(hora)
+        horarios = self._horarios(estacion, ruta)
+        if horarios is None:
+            return None
+        bus = _buscar_siguiente(horarios, minuto)
+        if bus is None:
+            return None
+        return f"{bus // 60:02d}:{bus % 60:02d}"
+
+    def cantidad(self, estacion, ruta):
+        horarios = self._horarios(estacion, ruta)
+        return 0 if horarios is None else len(horarios)
