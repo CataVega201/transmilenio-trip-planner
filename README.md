@@ -5,6 +5,8 @@ Alejandro Curtidor y Daniel Rincon.
 
 ## Empieza aqui
 
+**Para empezar con ChatGPT, usa las [guías rápidas del equipo](docs/inicio/LEEME.md).** Incluyen instalación, prompts y tareas individuales.
+
 - [Guia general del equipo](docs/GUIA_GENERAL.md)
 - [Instalacion desde cero](docs/INSTALACION.md)
 - [Git y GitHub paso a paso](docs/GIT_PASO_A_PASO.md)
