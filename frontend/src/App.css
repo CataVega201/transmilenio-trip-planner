@@ -39,7 +39,7 @@
 .app-salto:focus { top: var(--espacio-4); }
 @media (max-width: 800px) {
   .app { padding: 0 var(--espacio-1-25); }
-  .app-presentacion { grid-template-columns: 1fr; padding: var(--espacio-3) 0; gap: var(--espacio-8); }
+  .app-presentacion { grid-template-columns: 1fr; padding: var(--espacio-12) 0; gap: var(--espacio-8); }
   .app-ilustracion { height: 290px; }
   .app-tarjetas { grid-template-columns: 1fr; }
   .app-seccion-cabecera, .app-pie { flex-direction: column; align-items: start; gap: var(--espacio-4); }
