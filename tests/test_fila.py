@@ -61,6 +61,10 @@ class PruebasCasosNormales(unittest.TestCase):
         # El de 1 queda de tercero y sube en 20 junto con el de 10.
         self.assertEqual(simular_fila([0, 0, 1, 10], 10, 2), [10, 10, 20, 20])
 
+    def test_ejemplo_del_profesor(self):
+        # Contrato oficial: llegadas desordenadas, respuesta en el orden original.
+        self.assertEqual(simular_fila([30, 5, 5, 70], 60, 2), [120, 60, 60, 120])
+        
     def test_lista_vacia(self):
         self.assertEqual(simular_fila([], 5, 3), [])
 
