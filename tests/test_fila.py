@@ -1,4 +1,4 @@
-"""Pruebas de R10 - simular_fila.
+"""Pruebas de R10 - simular_fila (contrato del profesor).
 
 Ejecutar desde la carpeta del proyecto:
     .\\.venv\\Scripts\\python.exe -m unittest discover -s tests -p "test_fila.py" -v
@@ -11,28 +11,28 @@ import unittest
 from motor.fila import ColaFIFO, simular_fila
 
 
-def simular_minuto_a_minuto(llegadas, frecuencia, capacidad):
+def simular_segundo_a_segundo(llegadas, frecuencia, capacidad):
     """Version ingenua de referencia (solo para pruebas, fuera de motor/).
 
-    Recorre cada minuto desde 0 y usa una lista normal. Es lenta, pero
-    facil de comprobar a mano; sirve para comparar con la version real.
+    Ordena con sorted (permitido fuera del motor) y recorre cada segundo
+    desde 0 con una lista normal. Lenta, pero facil de comprobar a mano.
     """
-    resultado = []
+    n = len(llegadas)
+    orden = sorted(range(n), key=lambda i: llegadas[i])  # estable
+    salidas = [None] * n
     fila = []
     i = 0
-    minuto = 0
-    n = len(llegadas)
+    segundo = 0
     while i < n or fila:
-        while i < n and llegadas[i] == minuto:
-            fila.append(llegadas[i])
+        while i < n and llegadas[orden[i]] == segundo:
+            fila.append(orden[i])
             i += 1
-        if minuto % frecuencia == 0:
-            suben = fila[:capacidad]
+        if segundo > 0 and segundo % frecuencia == 0:
+            for persona in fila[:capacidad]:
+                salidas[persona] = segundo
             fila = fila[capacidad:]
-            for llegada in suben:
-                resultado.append([llegada, minuto, minuto - llegada])
-        minuto += 1
-    return resultado
+        segundo += 1
+    return salidas
 
 
 class PruebasCola(unittest.TestCase):
@@ -42,7 +42,6 @@ class PruebasCola(unittest.TestCase):
         cola.encolar(1)
         cola.encolar(2)
         self.assertEqual(cola.desencolar(), 1)
-        # Fuerza la vuelta circular y luego el crecimiento.
         for valor in range(3, 10):
             cola.encolar(valor)
         salida = []
@@ -55,82 +54,79 @@ class PruebasCola(unittest.TestCase):
             ColaFIFO().desencolar()
 
 
-class PruebasEjemplosContrato(unittest.TestCase):
-
-    def test_ejemplo_1(self):
-        self.assertEqual(
-            simular_fila([0, 0, 1, 10], 10, 2),
-            [[0, 0, 0], [0, 0, 0], [1, 10, 9], [10, 10, 0]])
-
-    def test_ejemplo_2(self):
-        self.assertEqual(
-            simular_fila([0, 0, 0], 10, 2),
-            [[0, 0, 0], [0, 0, 0], [0, 10, 10]])
-
-
 class PruebasCasosNormales(unittest.TestCase):
+
+    def test_ejemplo_explicado(self):
+        # Buses en 10, 20, 30... con cupo 2. Los de 0 y 0 suben en 10.
+        # El de 1 queda de tercero y sube en 20 junto con el de 10.
+        self.assertEqual(simular_fila([0, 0, 1, 10], 10, 2), [10, 10, 20, 20])
 
     def test_lista_vacia(self):
         self.assertEqual(simular_fila([], 5, 3), [])
 
-    def test_una_llegada_en_cero(self):
-        self.assertEqual(simular_fila([0], 7, 1), [[0, 0, 0]])
+    def test_no_hay_bus_en_cero(self):
+        self.assertEqual(simular_fila([0], 7, 1), [7])
 
     def test_llegada_entre_buses(self):
-        # Bus en 0, 5, 10: quien llega en 3 sube en 5.
-        self.assertEqual(simular_fila([3], 5, 1), [[3, 5, 2]])
+        self.assertEqual(simular_fila([3], 5, 1), [5])
 
     def test_llegada_justo_con_el_bus(self):
-        self.assertEqual(simular_fila([5], 5, 1), [[5, 5, 0]])
+        self.assertEqual(simular_fila([5, 10], 5, 1), [5, 10])
 
     def test_personas_simultaneas(self):
-        self.assertEqual(
-            simular_fila([4, 4, 4], 5, 3),
-            [[4, 5, 1], [4, 5, 1], [4, 5, 1]])
+        self.assertEqual(simular_fila([4, 4, 4], 5, 3), [5, 5, 5])
 
     def test_cupo_exacto(self):
-        self.assertEqual(
-            simular_fila([0, 0, 0], 10, 3),
-            [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+        self.assertEqual(simular_fila([0, 0, 0], 10, 3), [10, 10, 10])
 
     def test_una_mas_que_el_cupo(self):
-        self.assertEqual(
-            simular_fila([0, 0, 0, 0], 10, 3),
-            [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 10, 10]])
+        self.assertEqual(simular_fila([0, 0, 0, 0], 10, 3), [10, 10, 10, 20])
 
     def test_varias_salidas_seguidas(self):
-        # 5 personas, cupo 2, bus cada 3: salen en 0, 3 y 6.
-        self.assertEqual(
-            simular_fila([0, 0, 0, 0, 0], 3, 2),
-            [[0, 0, 0], [0, 0, 0], [0, 3, 3], [0, 3, 3], [0, 6, 6]])
+        self.assertEqual(simular_fila([0, 0, 0, 0, 0], 3, 2), [3, 3, 6, 6, 9])
 
     def test_fifo_quien_espera_sube_antes(self):
-        # Llegan 2 en 0 (cupo 1) y 1 en 10. En 10 sube primero quien
-        # esperaba desde 0, no el recien llegado.
-        self.assertEqual(
-            simular_fila([0, 0, 10], 10, 1),
-            [[0, 0, 0], [0, 10, 10], [10, 20, 10]])
+        # Cupo 1: el segundo de los que llegaron en 0 sube antes que el de 10.
+        self.assertEqual(simular_fila([0, 0, 10], 10, 1), [10, 20, 30])
+
+    def test_llegadas_desordenadas_respetan_orden_de_salida(self):
+        # El de 3 llego antes que el de 25 aunque aparezca despues en la lista.
+        self.assertEqual(simular_fila([25, 3, 3], 10, 1), [30, 10, 20])
+
+    def test_desordenadas_con_cupo_lleno(self):
+        # Orden real de llegada: 0 (pos 2), 1 (pos 1), 2 (pos 0). Cupo 2.
+        self.assertEqual(simular_fila([2, 1, 0], 5, 2), [10, 5, 5])
+
+    def test_empate_respeta_posicion_en_la_lista(self):
+        # Tres llegan en 4 mezclados con otro que llega en 9. Cupo 2:
+        # en 5 suben las posiciones 0 y 2; en 10 la posicion 3 y la del 9.
+        self.assertEqual(simular_fila([4, 9, 4, 4], 5, 2), [5, 10, 5, 10])
 
     def test_gran_salto_de_tiempo(self):
         inicio = time.perf_counter()
         resultado = simular_fila([0, 1000000, 1000000000], 7, 1)
         duracion = time.perf_counter() - inicio
-        self.assertEqual(resultado, [
-            [0, 0, 0],
-            [1000000, 1000006, 6],
-            # 1000000000 = 7 * 142857142 + 6, el bus siguiente es 1000000001.
-            [1000000000, 1000000001, 1],
-        ])
-        # Sin recorrer minutos vacios debe ser practicamente instantaneo.
+        # 1000000 = 7 * 142857 + 1 -> siguiente bus 1000006.
+        # 1000000000 = 7 * 142857142 + 6 -> siguiente bus 1000000001.
+        self.assertEqual(resultado, [7, 1000006, 1000000001])
         self.assertLess(duracion, 0.1)
 
+    def test_segundos_con_decimales(self):
+        self.assertEqual(simular_fila([0.5, 2.5], 2.5, 1), [2.5, 5.0])
+
     def test_no_modifica_la_entrada(self):
-        llegadas = [0, 0, 1]
+        llegadas = [5, 0, 1]
         simular_fila(llegadas, 2, 1)
-        self.assertEqual(llegadas, [0, 0, 1])
+        self.assertEqual(llegadas, [5, 0, 1])
 
     def test_acepta_tupla(self):
-        self.assertEqual(simular_fila((0, 1), 1, 1), [[0, 0, 0], [1, 1, 0]])
+        self.assertEqual(simular_fila((0, 1), 1, 1), [1, 2])
+
+    def test_devuelve_lista_simple(self):
+        resultado = simular_fila([0, 3], 5, 2)
+        self.assertIsInstance(resultado, list)
+        for valor in resultado:
+            self.assertIsInstance(valor, int)
 
 
 class PruebasEntradasInvalidas(unittest.TestCase):
@@ -147,10 +143,6 @@ class PruebasEntradasInvalidas(unittest.TestCase):
         with self.assertRaises(ValueError):
             simular_fila([0], 5, -1)
 
-    def test_llegadas_desordenadas(self):
-        with self.assertRaises(ValueError):
-            simular_fila([0, 5, 3], 5, 1)
-
     def test_llegada_negativa(self):
         with self.assertRaises(ValueError):
             simular_fila([-1, 0], 5, 1)
@@ -159,13 +151,13 @@ class PruebasEntradasInvalidas(unittest.TestCase):
         with self.assertRaises(TypeError):
             simular_fila("0,1", 5, 1)
         with self.assertRaises(TypeError):
-            simular_fila([0, 1.5], 5, 1)
+            simular_fila([0, "1"], 5, 1)
         with self.assertRaises(TypeError):
-            simular_fila([0], 5.0, 1)
+            simular_fila([0], "5", 1)
         with self.assertRaises(TypeError):
-            simular_fila([0], 5, "2")
+            simular_fila([0], 5, 2.0)
 
-    def test_bool_no_cuenta_como_entero(self):
+    def test_bool_no_cuenta_como_numero(self):
         with self.assertRaises(TypeError):
             simular_fila([0], True, 1)
         with self.assertRaises(TypeError):
@@ -174,53 +166,58 @@ class PruebasEntradasInvalidas(unittest.TestCase):
             simular_fila([False], 5, 1)
 
     def test_parametros_invalidos_con_lista_vacia(self):
-        # Se valida aunque no haya pasajeros.
         with self.assertRaises(ValueError):
             simular_fila([], 0, 1)
 
 
 class PruebasComparacionConReferencia(unittest.TestCase):
 
-    def test_coincide_con_simulacion_minuto_a_minuto(self):
+    def test_coincide_con_simulacion_segundo_a_segundo(self):
         generador = random.Random(2026)  # semilla fija: siempre los mismos casos
-        for _ in range(300):
+        for _ in range(400):
             n = generador.randint(0, 40)
             llegadas = []
-            minuto = 0
+            segundo = 0
             for _ in range(n):
-                minuto += generador.choice([0, 0, 1, 2, 5, 13])
-                llegadas.append(minuto)
+                segundo += generador.choice([0, 0, 1, 2, 5, 13])
+                llegadas.append(segundo)
+            if generador.random() < 0.5:
+                generador.shuffle(llegadas)  # la mitad de los casos desordenados
             frecuencia = generador.randint(1, 8)
             capacidad = generador.randint(1, 4)
             with self.subTest(llegadas=llegadas, frecuencia=frecuencia,
                               capacidad=capacidad):
                 self.assertEqual(
                     simular_fila(llegadas, frecuencia, capacidad),
-                    simular_minuto_a_minuto(llegadas, frecuencia, capacidad))
+                    simular_segundo_a_segundo(llegadas, frecuencia, capacidad))
 
 
 class PruebasVolumen(unittest.TestCase):
 
     def test_cientos_de_miles_todos_en_cero(self):
-        # Peor caso de espacio de la cola: todos esperan a la vez.
         n = 300000
         resultado = simular_fila([0] * n, 10, 3)
         self.assertEqual(len(resultado), n)
-        self.assertEqual(resultado[0], [0, 0, 0])
-        self.assertEqual(resultado[2], [0, 0, 0])
-        self.assertEqual(resultado[3], [0, 10, 10])
-        ultimo_bus = ((n - 1) // 3) * 10
-        self.assertEqual(resultado[-1], [0, ultimo_bus, ultimo_bus])
+        self.assertEqual(resultado[:4], [10, 10, 10, 20])
+        self.assertEqual(resultado[-1], ((n - 1) // 3 + 1) * 10)
 
     def test_cientos_de_miles_con_huecos(self):
         n = 200000
         llegadas = [i * 1000 for i in range(n)]
         resultado = simular_fila(llegadas, 7, 1)
         self.assertEqual(len(resultado), n)
-        for i in (0, 1, n // 2, n - 1):
-            llegada = llegadas[i]
-            bus = ((llegada + 6) // 7) * 7
-            self.assertEqual(resultado[i], [llegada, bus, bus - llegada])
+        self.assertEqual(resultado[0], 7)
+        for i in (1, n // 2, n - 1):
+            self.assertEqual(resultado[i], ((llegadas[i] + 6) // 7) * 7)
+
+    def test_cientos_de_miles_desordenados(self):
+        generador = random.Random(7)
+        n = 200000
+        llegadas = [generador.randint(0, n) for _ in range(n)]
+        resultado = simular_fila(llegadas, 5, 2)
+        self.assertEqual(len(resultado), n)
+        for i in range(n):
+            self.assertGreaterEqual(resultado[i], llegadas[i])
 
 
 if __name__ == "__main__":

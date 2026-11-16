@@ -2,16 +2,23 @@
 
 Funcion publica: simular_fila(llegadas, frecuencia, capacidad).
 
-Reglas acordadas (docs/CONTRATOS.md, seccion 4):
-- llegadas: lista de minutos enteros no negativos en orden no decreciente.
-  Cada elemento es una persona; puede haber varias en el mismo minuto.
-- frecuencia y capacidad: enteros positivos (los bool no cuentan).
-- El primer bus sale en el minuto 0 y los demas en multiplos de frecuencia.
-- Quien llega en el mismo minuto que un bus puede abordarlo
-  (llegada antes de salida en el mismo instante).
-- Se respeta FIFO; si el bus se llena, los demas esperan el siguiente.
-- Respuesta: lista de registros [llegada, abordaje, espera], uno por
-  pasajero, en orden de entrada. espera = abordaje - llegada.
+Contrato del profesor:
+- llegadas: segundos en que llega cada persona.
+- frecuencia: segundos entre buses. Los buses salen en frecuencia,
+  2*frecuencia, 3*frecuencia, ... (no hay bus en el segundo 0).
+- capacidad: cupo de cada bus.
+- La gente sube en orden de llegada (FIFO).
+- Devuelve, en el mismo orden de la lista llegadas, el segundo en que
+  salio el bus de cada persona.
+
+Decisiones del equipo para lo que el contrato no dice:
+- Quien llega justo en el segundo en que sale un bus alcanza a subir.
+- Si dos personas llegan en el mismo segundo, sube primero la que aparece
+  antes en la lista.
+- Las llegadas pueden venir desordenadas; se ordenan con un merge sort
+  propio. Si ya vienen ordenadas no se paga ese costo.
+- Llegadas negativas, frecuencia o capacidad no positivas y tipos no
+  numericos (incluido bool) se rechazan con ValueError o TypeError.
 
 Solo usa estructuras propias: no dict, set, collections, sorted, etc.
 """
@@ -74,42 +81,90 @@ class ColaFIFO:
         self._inicio = 0
 
 
-def _es_entero(valor):
-    # bool es subclase de int en Python, pero no cuenta como entero aqui.
-    return isinstance(valor, int) and not isinstance(valor, bool)
+def _es_numero(valor):
+    # bool es subclase de int en Python, pero no cuenta como numero aqui.
+    return isinstance(valor, (int, float)) and not isinstance(valor, bool)
 
 
 def _validar(llegadas, frecuencia, capacidad):
+    """Valida la entrada y dice si las llegadas ya estan ordenadas."""
     if not isinstance(llegadas, (list, tuple)):
-        raise TypeError("llegadas debe ser una lista de minutos enteros")
-    if not _es_entero(frecuencia):
-        raise TypeError("frecuencia debe ser un entero")
-    if not _es_entero(capacidad):
+        raise TypeError("llegadas debe ser una lista de segundos")
+    if not _es_numero(frecuencia):
+        raise TypeError("frecuencia debe ser un numero")
+    if isinstance(capacidad, bool) or not isinstance(capacidad, int):
         raise TypeError("capacidad debe ser un entero")
     if frecuencia <= 0:
         raise ValueError("frecuencia debe ser mayor que cero")
     if capacidad <= 0:
         raise ValueError("capacidad debe ser mayor que cero")
 
-    anterior = 0
+    ordenadas = True
     for posicion in range(len(llegadas)):
-        minuto = llegadas[posicion]
-        if not _es_entero(minuto):
+        segundo = llegadas[posicion]
+        if not _es_numero(segundo):
             raise TypeError(
-                "la llegada en la posicion %d no es un entero" % posicion)
-        if minuto < 0:
+                "la llegada en la posicion %d no es un numero" % posicion)
+        if segundo < 0:
             raise ValueError(
                 "la llegada en la posicion %d es negativa" % posicion)
-        if minuto < anterior:
-            raise ValueError(
-                "las llegadas deben estar en orden no decreciente "
-                "(posicion %d)" % posicion)
-        anterior = minuto
+        if posicion > 0 and segundo < llegadas[posicion - 1]:
+            ordenadas = False
+    return ordenadas
 
 
-def _primer_bus_desde(minuto, frecuencia):
-    """Menor multiplo de frecuencia que es mayor o igual a minuto."""
-    return ((minuto + frecuencia - 1) // frecuencia) * frecuencia
+def _orden_de_llegada(llegadas):
+    """Posiciones de llegadas ordenadas por segundo (merge sort estable).
+
+    En empate conserva el orden de la lista original. O(n log n).
+    """
+    n = len(llegadas)
+    actual = list(range(n))
+    auxiliar = [0] * n
+    ancho = 1
+    while ancho < n:
+        inicio = 0
+        while inicio < n:
+            medio = inicio + ancho
+            if medio > n:
+                medio = n
+            fin = inicio + 2 * ancho
+            if fin > n:
+                fin = n
+            i = inicio
+            j = medio
+            k = inicio
+            while i < medio and j < fin:
+                # <= mantiene la estabilidad: en empate gana el de la izquierda.
+                if llegadas[actual[i]] <= llegadas[actual[j]]:
+                    auxiliar[k] = actual[i]
+                    i += 1
+                else:
+                    auxiliar[k] = actual[j]
+                    j += 1
+                k += 1
+            while i < medio:
+                auxiliar[k] = actual[i]
+                i += 1
+                k += 1
+            while j < fin:
+                auxiliar[k] = actual[j]
+                j += 1
+                k += 1
+            inicio = fin
+        actual, auxiliar = auxiliar, actual
+        ancho *= 2
+    return actual
+
+
+def _primer_bus_desde(segundo, frecuencia):
+    """Primer bus (frecuencia, 2*frecuencia, ...) que sale en o despues de segundo."""
+    k = int(segundo // frecuencia)
+    if k * frecuencia < segundo:
+        k += 1
+    if k < 1:
+        k = 1  # no hay bus en el segundo 0
+    return k * frecuencia
 
 
 def simular_fila(llegadas, frecuencia, capacidad):
@@ -117,38 +172,47 @@ def simular_fila(llegadas, frecuencia, capacidad):
 
     Ejemplo:
     >>> simular_fila([0, 0, 1, 10], 10, 2)
-    [[0, 0, 0], [0, 0, 0], [1, 10, 9], [10, 10, 0]]
+    [10, 10, 20, 20]
+    >>> simular_fila([25, 3, 3], 10, 1)
+    [30, 10, 20]
     """
-    _validar(llegadas, frecuencia, capacidad)
+    ordenadas = _validar(llegadas, frecuencia, capacidad)
 
     n = len(llegadas)
-    resultado = []
+    salidas = [0] * n
+    if n == 0:
+        return []
+
+    if ordenadas:
+        orden = range(n)
+    else:
+        orden = _orden_de_llegada(llegadas)
+
     cola = ColaFIFO()
-    siguiente = 0   # indice de la proxima persona que aun no llega a la fila
-    bus = 0         # minuto del proximo bus a considerar
+    siguiente = 0              # cuantas personas ya entraron a la fila
+    bus = frecuencia           # salida del proximo bus a considerar
 
     while siguiente < n or not cola.vacia():
-        # Salto de tiempo: si nadie espera, el proximo bus util es el primero
-        # que sale en o despues de la siguiente llegada. No se recorren
-        # minutos ni buses vacios.
+        # Salto de tiempo: si nadie espera, se va directo al primer bus que
+        # sale en o despues de la siguiente llegada. No se recorren buses
+        # vacios.
         if cola.vacia():
-            llegada = llegadas[siguiente]
+            llegada = llegadas[orden[siguiente]]
             if bus < llegada:
                 bus = _primer_bus_desde(llegada, frecuencia)
 
         # Llegadas antes de salida: entran a la fila todos los que llegan
-        # hasta el minuto del bus, incluido ese mismo minuto.
-        while siguiente < n and llegadas[siguiente] <= bus:
-            cola.encolar(llegadas[siguiente])
+        # hasta el segundo del bus, incluido ese mismo segundo.
+        while siguiente < n and llegadas[orden[siguiente]] <= bus:
+            cola.encolar(orden[siguiente])
             siguiente += 1
 
         # El bus sale: suben en orden FIFO hasta llenar la capacidad.
         subieron = 0
         while subieron < capacidad and not cola.vacia():
-            llegada = cola.desencolar()
-            resultado.append([llegada, bus, bus - llegada])
+            salidas[cola.desencolar()] = bus
             subieron += 1
 
         bus += frecuencia
 
-    return resultado
+    return salidas
