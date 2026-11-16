@@ -10,7 +10,7 @@
 .app-punto { color: var(--color-marca); }
 .app-descripcion { color: var(--color-secundario); font-size: 1.05rem; max-width: 30rem; margin-top: 1.5rem; }
 .app-enlace { display: inline-flex; gap: 1rem; align-items: center; color: var(--color-marca); font-weight: 650; text-underline-offset: .35rem; margin-top: 2rem; padding: .5rem 0; }
-.app-ilustracion { position: relative; height: 320px; overflow: hidden; border: 1px solid var(--color-borde); border-radius: 2rem; background-color: #eeeee5; background-image: radial-gradient(#d0d2c6 1px, transparent 1px); background-size: 20px 20px; }
+.app-ilustracion { position: relative; height: 320px; overflow: hidden; border: 1px solid var(--color-borde); border-radius: 2rem; background-color: var(--color-fondo); background-image: radial-gradient(var(--color-borde) 1px, transparent 1px); background-size: 20px 20px; }
 .app-linea { position: absolute; border-radius: 0 0 48px 0; border: solid; border-width: 0 10px 10px 0; }
 .app-linea-principal { width: 52%; height: 165px; left: 21%; top: 55px; border-color: var(--color-marca); transform: rotate(180deg); }
 .app-linea-secundaria { width: 65%; height: 210px; left: 50%; top: -20px; border-color: #abb99d; transform: rotate(90deg); }
