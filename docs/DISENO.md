@@ -1,6 +1,6 @@
 # Base visual compartida
 
-Responsable de integracion: Catalina. Esta rama entrega tema y pantalla inicial;
+Responsable de integración: Catalina. Esta rama entrega tema y pantalla inicial;
 los controles de consultas, viajes, operacion y rendimiento siguen pendientes.
 
 ## Reglas para los componentes de Daniel y Catalina
