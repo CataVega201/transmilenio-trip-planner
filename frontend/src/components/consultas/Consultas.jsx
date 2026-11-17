@@ -5,7 +5,7 @@ import { useConsulta } from './useConsulta'
 import './consultas.css'
 
 const opciones = { estado: 'Estado de estación', bus: 'Próximo bus', rango: 'Rango alfabético', ranking: 'Estaciones con más buses' }
-const estados = { ABIERTA: 'La estación está abierta.', CERRADA: 'La estación está cerrada.', NO_EXISTE: 'No se encontró la estación.' }
+const estados = { ABIERTA: 'La estación está abierta.', CERRADA: 'La estación está cerrada.', 'NO EXISTE': 'No se encontró la estación.' }
 
 function Formulario({ modo, versionRed }) {
   const { consultar, salida, cargando } = useConsulta(versionRed)

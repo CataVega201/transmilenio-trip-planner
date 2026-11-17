@@ -20,8 +20,8 @@ export default function Viajes({ versionRed = 0 }) {
       {cargando && 'Buscando recorrido…'}{salida?.error}
       {salida && !salida.error && (salida.datos === null ? 'No hay recorrido disponible.'
         : salida.datos.length === 0 ? 'Ya estás en la estación de destino.'
-        : <ol>{salida.datos.map(([ruta, subida, bajada, paradas], i) =>
-          <li key={i}><strong>{i ? 'Transborda a ' : 'Toma '}{ruta}</strong> en {subida}. Baja en {bajada} después de {paradas} {paradas === 1 ? 'parada' : 'paradas'}.</li>)}</ol>)}
+        : <ol>{salida.datos.map(([ruta, subida, bajada], i) =>
+          <li key={i}><strong>{i ? 'Transborda a ' : 'Toma '}{ruta}</strong> en {subida}. Baja en {bajada}.</li>)}</ol>)}
     </div>
   </section>
 }
