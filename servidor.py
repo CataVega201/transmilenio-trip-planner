@@ -31,20 +31,30 @@ class Pendiente(Exception):
     """Una colaboración requerida aún no está integrada."""
 
 
+class EntradaInvalida(Exception):
+    """La petición no cumple el contrato del adaptador."""
+
+
 def argumentos(datos, campos):
     valores = []
     for campo in campos.split():
         if campo == "al_reves":
             valor = datos.get(campo, "false")
             if valor not in ("true", "false"):
-                raise ValueError("al_reves debe ser true o false")
+                raise EntradaInvalida("al_reves debe ser true o false")
             valores.append(valor == "true")
         elif campo == "k":
-            valores.append(int(datos[campo]))
+            try:
+                valores.append(int(datos[campo]))
+            except (KeyError, TypeError, ValueError) as error:
+                raise EntradaInvalida from error
         else:
-            valor = datos[campo]
+            try:
+                valor = datos[campo]
+            except KeyError as error:
+                raise EntradaInvalida from error
             if not isinstance(valor, str):
-                raise ValueError(f"{campo} debe ser texto")
+                raise EntradaInvalida(f"{campo} debe ser texto")
             valores.append(valor)
     return valores
 
@@ -70,7 +80,7 @@ def crear_app(carpeta_datos=None, carpeta_web=None, *, red=None, simular=None, m
         nonlocal red
         datos = request.get_json() if escritura else request.args
         if escritura and not isinstance(datos, dict):
-            raise ValueError("Se esperaba un objeto JSON")
+            raise EntradaInvalida("Se esperaba un objeto JSON")
         args = argumentos(datos, campos)
         with bloqueo:
             if red is None:
@@ -98,9 +108,13 @@ def crear_app(carpeta_datos=None, carpeta_web=None, *, red=None, simular=None, m
     def fila():
         datos = request.get_json()
         if not isinstance(datos, dict):
-            raise ValueError("Se esperaba un objeto JSON")
+            raise EntradaInvalida("Se esperaba un objeto JSON")
         funcion = simular or componente("simular_fila")
-        return jsonify(ok=True, datos=funcion(datos["llegadas"], datos["frecuencia"], datos["capacidad"]))
+        try:
+            argumentos_fila = datos["llegadas"], datos["frecuencia"], datos["capacidad"]
+        except KeyError as error:
+            raise EntradaInvalida from error
+        return jsonify(ok=True, datos=funcion(*argumentos_fila))
 
     @app.post("/api/rendimiento")
     def rendimiento():
@@ -108,15 +122,19 @@ def crear_app(carpeta_datos=None, carpeta_web=None, *, red=None, simular=None, m
             raise Pendiente
         datos = request.get_json()
         if not isinstance(datos, dict):
-            raise ValueError("Se esperaba un objeto JSON")
-        return jsonify(ok=True, datos=medir(datos["tamanos"], datos["repeticiones"]))
+            raise EntradaInvalida("Se esperaba un objeto JSON")
+        try:
+            argumentos_medicion = datos["tamanos"], datos["repeticiones"]
+        except KeyError as error:
+            raise EntradaInvalida from error
+        return jsonify(ok=True, datos=medir(*argumentos_medicion))
 
     @app.errorhandler(Exception)
     def error(error):
         if isinstance(error, Pendiente):
             estado, codigo = 503, "MODULO_PENDIENTE"
             mensaje = str(error) or "Esta función estará disponible al integrar el módulo del equipo."
-        elif isinstance(error, (ValueError, KeyError, TypeError)) or (
+        elif isinstance(error, EntradaInvalida) or (
             isinstance(error, HTTPException) and error.code in (400, 415)
         ):
             estado, codigo, mensaje = 400, "ENTRADA_INVALIDA", "Revisa los campos de la consulta."
@@ -142,4 +160,3 @@ app = crear_app()
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000)
-

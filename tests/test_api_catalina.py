@@ -44,6 +44,12 @@ class ContratoWeb(unittest.TestCase):
             self.assertEqual(self.cliente.get(ruta).status_code, 400)
         self.assertEqual(self.cliente.post('/api/estaciones/cerrar',json=[]).status_code,400)
 
+    def test_error_del_motor_no_se_confunde_con_entrada(self):
+        self.red.estado.side_effect = ValueError("fallo interno")
+        respuesta = self.cliente.get('/api/estaciones/estado', query_string={'nombre': 'A'})
+        self.assertEqual(respuesta.status_code, 500)
+        self.assertEqual(respuesta.json['error']['codigo'], 'ERROR_INTERNO')
+
     def test_salud_y_modulos_inyectados(self):
         fila, medir = Mock(return_value=[]), Mock(return_value=[])
         cliente = crear_app(simular=fila, medir=medir).test_client()
@@ -53,4 +59,3 @@ class ContratoWeb(unittest.TestCase):
         self.assertTrue(cliente.post('/api/rendimiento',json={'tamanos':[100],'repeticiones':3}).json['ok'])
         medir.assert_called_once_with([100],3)
         self.assertEqual(self.cliente.post('/api/rendimiento',json={}).status_code,503)
-
