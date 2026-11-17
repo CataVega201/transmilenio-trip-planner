@@ -1,0 +1,32 @@
+:root {
+  color-scheme: light;
+  --color-fondo: #f6f5f1;
+  --color-superficie: #ffffff;
+  --color-texto: #252622;
+  --color-secundario: #60635d;
+  --color-marca: #9f2435;
+  --color-marca-suave: #f8e9ec;
+  --color-borde: #dedfd7;
+  --color-exito: #286344;
+  --color-foco: #1859ad;
+  --fuente: 'Segoe UI', system-ui, sans-serif;
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 0.75rem;
+  --espacio-0-3: 0.3rem;
+  --espacio-0-4: 0.4rem;
+  --espacio-0-65: 0.65rem;
+  --espacio-0-7: 0.7rem;
+  --espacio-0-8: 0.8rem;
+  --espacio-4: 1rem;
+  --espacio-1-2: 1.2rem;
+  --espacio-1-25: 1.25rem;
+  --espacio-6: 1.5rem;
+  --espacio-1-7: 1.7rem;
+  --espacio-8: 2rem;
+  --espacio-12: 3rem;
+  --espacio-16: 4rem;
+  --espacio-20: 5rem;
+  --radio: 1rem;
+  --ancho-contenido: 72rem;
+}
