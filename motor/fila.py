@@ -83,7 +83,7 @@ class ColaFIFO:
 
 def _es_numero(valor):
     # bool es subclase de int en Python, pero no cuenta como numero aqui.
-return (isinstance(valor, (int, float)) and not isinstance(valor, bool)
+    return (isinstance(valor, (int, float)) and not isinstance(valor, bool)
             and valor == valor and valor not in (float("inf"), float("-inf")))
 
 

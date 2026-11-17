@@ -169,6 +169,15 @@ class PruebasEntradasInvalidas(unittest.TestCase):
         with self.assertRaises(TypeError):
             simular_fila([False], 5, 1)
 
+    def test_rechaza_llegadas_y_frecuencias_no_finitas(self):
+        for valor in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(valor=valor, campo="llegadas"):
+                with self.assertRaises(TypeError):
+                    simular_fila([valor], 1, 1)
+            with self.subTest(valor=valor, campo="frecuencia"):
+                with self.assertRaises(TypeError):
+                    simular_fila([0], valor, 1)
+
     def test_parametros_invalidos_con_lista_vacia(self):
         with self.assertRaises(ValueError):
             simular_fila([], 0, 1)
