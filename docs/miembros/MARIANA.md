@@ -90,7 +90,7 @@ los conteos en cada cambio sin medir el costo total.
 La interfaz inicial `actualizar(filas)` es provisional; si una actualizacion
 incremental es necesaria, propon la firma concreta en la Issue de contratos y
 coordina el cambio con Alejandro antes de implementarla. No cambies el formato
-publico `[nombre, cantidad_buses]` para acomodar la estructura interna.
+publico `(nombre, buses_por_dia)` para acomodar la estructura interna.
 
 ## 6. Pruebas minimas de tu bloque
 

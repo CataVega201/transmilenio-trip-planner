@@ -1,11 +1,6 @@
 # Acuerdos del motor y de la conexion web
 
-Version propuesta 1 para trabajo coordinado. El profesor entrego las firmas,
-las restricciones y las necesidades; no los formatos detallados de retorno ni
-todas las reglas de borde. Las respuestas y politicas que se fijan aqui son
-DECISIONES DEL EQUIPO. Antes de implementar su parte, cada integrante confirma
-este documento o propone un cambio en su Issue. No son una garantia de lo que
-esperara el script del profesor.
+Este documento recoge el contrato oficial de entrega y los acuerdos internos del equipo. Si difieren, prevalece el enunciado del profesor. La Issue #11 registra los formatos que cambiaron.
 
 ## 1. Reglas oficiales que no cambiamos
 
@@ -32,8 +27,8 @@ Decisiones del grupo:
 - Las consultas de nombres y rutas se normalizan quitando espacios exteriores,
   pasando a mayusculas y reemplazando vocales acentuadas y U con dieresis por
   su letra simple. La letra ENE con virgulilla se conserva como letra propia.
-  El contrato interno almacena solo los nombres ya normalizados. Se implementa
-  con metodos de `str`, sin importar `unicodedata` en el motor.
+  La clave normalizada se usa para buscar. Se guarda y devuelve el nombre
+  original del CSV. Se implementa con metodos de `str`.
 - La conversion produce CSV UTF-8 sin BOM, encabezados exactos, sin indices
   extra, ordenes enteros y referencias validas. El lector acepta tambien BOM
   mediante `encoding='utf-8-sig'`. Los ordenes se comparan numericamente.
@@ -61,7 +56,7 @@ Decisiones del grupo:
 - Ruta inexistente, nombre inexistente y ruta vacia tienen respuestas definidas
   abajo. Parametros con tipos incompatibles producen `TypeError`; argumentos
   numericos o formatos invalidos producen `ValueError`. Los bool no cuentan
-  como enteros para k, frecuencia, capacidad o minutos.
+  como enteros para k, frecuencia, capacidad o segundos.
 
 No se requiere pandas para ejecutar el motor. La conversion puede usarlo si
 se acuerda y registra como dependencia separada de conversion.
@@ -74,18 +69,18 @@ convertirlas sin meter JSON o Flask dentro del motor.
 | Funcion oficial | Respuesta acordada |
 | --- | --- |
 | `Red(carpeta)` | Objeto con la red cargada desde esa carpeta; sin leer rutas absolutas del PC del autor |
-| `estado(nombre)` | `"ABIERTA"`, `"CERRADA"` o `"NO_EXISTE"` |
+| `estado(nombre)` | `"ABIERTA"`, `"CERRADA"` o `"NO EXISTE"` |
 | `autocompletar(prefijo, k)` | Lista alfabetica de hasta k nombres abiertos; `[]` si no hay coincidencias |
 | `rango(desde, hasta)` | Lista alfabetica de nombres abiertos, extremos incluidos |
 | `proximo_bus(estacion, ruta, hora)` | Hora `HH:MM` o `None` si no hay un bus elegible |
 | `viaje(origen, destino)` | Lista de uno o dos tramos; `None` si no hay viaje; `[]` si origen y destino son la misma estacion abierta |
-| `ranking(k)` | Lista de pares `[nombre, cantidad_buses]`, hasta k estaciones abiertas |
+| `ranking(k)` | Lista de tuplas `(nombre, buses_por_dia)` de hasta k estaciones abiertas, de mayor a menor |
 | `agregar_parada(ruta, nueva, despues_de)` | `True` si cambia la ruta; `False` si no puede hacerse |
 | `quitar_parada(ruta, estacion)` | `True` si quita una parada existente; `False` si no puede hacerse |
 | `recorrido(ruta, al_reves=False)` | Lista de nombres en el orden de la ruta, o `[]` si no existe o esta vacia |
 | `cerrar(nombre)` / `reabrir(nombre)` | `True` si cambia el estado; `False` si no existe o ya estaba en ese estado |
 | `deshacer()` / `rehacer()` | `True` si ejecuta una accion; `False` si no hay una disponible |
-| `simular_fila(llegadas, frecuencia, capacidad)` | Lista de registros `[llegada, abordaje, espera]`, uno por pasajero, en orden de entrada |
+| `simular_fila(llegadas, frecuencia, capacidad)` | Lista de segundos de salida, uno por pasajero, en el orden original de las llegadas |
 
 Reglas adicionales:
 
@@ -99,8 +94,8 @@ Reglas adicionales:
   actual devuelven `None`. Un formato de hora invalido produce `ValueError`.
 - Las estaciones cerradas pueden atravesarse a bordo. No permiten subir,
   bajar ni transbordar. Siguen en el recorrido fisico y cuentan al medir paradas.
-- Un tramo de R5 es `[ruta, subida, bajada, numero_paradas]`. El numero de paradas
-  es el de enlaces recorridos: A-B-C son dos. Se sigue el sentido de la ruta.
+- Un tramo de R5 es la tupla `(ruta, sube_en, baja_en)`. El numero de paradas
+  solo se usa para comparar viajes: A-B-C son dos enlaces. Se sigue el sentido de la ruta.
   Se admiten cero o un transbordo; no se prometen conexiones por horario.
 - En R5 gana el menor total de paradas; en empate, menos transbordos; despues,
   el orden alfabetico de ruta del primer tramo, ruta del segundo y transbordo.
@@ -126,26 +121,18 @@ Reglas adicionales:
 
 ## 4. Simulacion R10
 
-Decisiones del grupo: `llegadas` es una lista de minutos enteros no negativos,
-en orden no decreciente. Cada elemento representa una persona. Puede haber
-varias llegadas al mismo minuto. Frecuencia y capacidad son enteros positivos;
-una llegada negativa, desordenada o un parametro no valido se rechaza.
+Las llegadas se expresan en segundos y pueden venir desordenadas. La frecuencia
+se expresa en segundos y la capacidad indica el cupo por bus. Los buses salen
+en frecuencia, 2 × frecuencia, etc. Una persona puede abordar si llega en el
+mismo segundo de la salida. Se respeta FIFO, conservando el orden de entrada
+para llegadas simultáneas.
 
-El primer bus sale en el minuto cero y los siguientes en multiplos de frecuencia.
-Una llegada en el mismo minuto que un bus puede abordar ese bus. Se respeta FIFO;
-si se llena, los demas esperan. No hay limite artificial al numero de buses.
-La espera es abordaje menos llegada. Una lista vacia devuelve `[]`.
+El resultado contiene el segundo de salida del bus de cada persona, en el
+orden original de las llegadas. Una lista vacía devuelve `[]`.
 
-Ejemplo comprobable a mano:
-
-```text
-simular_fila([0, 0, 1, 10], 10, 2)
-=> [[0, 0, 0], [0, 0, 0], [1, 10, 9], [10, 10, 0]]
+```python
+simular_fila([30, 5, 5, 70], 60, 2)  # [120, 60, 60, 120]
 ```
-
-Otro: `simular_fila([0, 0, 0], 10, 2)` devuelve
-`[[0, 0, 0], [0, 0, 0], [0, 10, 10]]`. Una llegada en 1000000 no debe requerir
-recorrer un millon de minutos vacios; se avanza entre eventos utiles.
 
 ## 5. Limites internos entre autores
 
@@ -157,7 +144,7 @@ confirmar antes de publicar su modulo. No son firmas adicionales del profesor.
 | `tabla_hash.py`, Mariana | `TablaHash()`, `guardar(clave, valor)`, `obtener(clave, defecto=None)`, `eliminar(clave)` con bool, `pares()` para iterar pares; guardar reemplaza valor de clave existente |
 | `horarios.py`, Catalina | `IndiceHorarios(filas)` donde cada fila es `[ruta, estacion, hora]`; `siguiente(estacion, ruta, hora)` devuelve hora o None; `cantidad(estacion, ruta)` devuelve eventos de la pareja |
 | `fila.py`, Daniel | `simular_fila(llegadas, frecuencia, capacidad)` independiente de Red |
-| `estaciones.py`, Mariana | `IndiceEstaciones(nombres)`; `estado(nombre)`, `autocompletar(prefijo,k)`, `rango(desde,hasta)`, `cambiar_estado(nombre,abierta)`; nombres normalizados; consultas retornan como tabla publica |
+| `estaciones.py`, Mariana | `IndiceEstaciones(nombres)`; `estado(nombre)`, `autocompletar(prefijo,k)`, `rango(desde,hasta)`, `cambiar_estado(nombre,abierta)`; claves normalizadas y nombres originales; consultas retornan como tabla publica |
 | `ranking.py`, Mariana | `IndiceRanking(filas)` con pares `[nombre, cantidad]` de abiertas; `actualizar(filas)` sustituye la base; `ranking(k)` retorna pares. Es interfaz inicial; discutir costo de actualizacion antes de implementarla |
 | `rutas.py`, Alejandro | Almacen de rutas y operaciones R7; publica un adaptador para entregar conteos vigentes al ranking y restricciones a viajes/horarios |
 | `red.py`, Alejandro | Fachada publica Red; coordina modulos y reglas que dependen de varios; no vuelve a implementar los algoritmos de otros |
@@ -182,8 +169,8 @@ antes de unirla; no dejar `main` con imports rotos.
 
 ## 6. API web prevista
 
-TODAS las rutas siguientes, excepto `GET /api/estado`, estan pendientes. Catalina
-las implementara despues de integrar las firmas correspondientes del motor.
+Las rutas están definidas en el adaptador. Las operaciones que dependen de
+`Red` y del medidor quedan pendientes hasta integrar esos componentes.
 
 | Peticion | Entrada | Funcion del motor |
 | --- | --- | --- |
@@ -206,8 +193,7 @@ las implementara despues de integrar las firmas correspondientes del motor.
 
 Formato comun de las rutas futuras: respuesta HTTP 200 con
 `{"ok": true, "datos": ...}`; un resultado valido sin coincidencias conserva
-lista vacia, false o null segun el motor. Peticion mal formada o ValueError/TypeError
-de entrada: HTTP 400 con `{"ok": false, "error": {"codigo": "ENTRADA_INVALIDA",
+lista vacia, false o null segun el motor. Peticion mal formada detectada por el adaptador: HTTP 400 con `{"ok": false, "error": {"codigo": "ENTRADA_INVALIDA",
 "mensaje": "Explicacion para el usuario"}}`. Fallo inesperado: HTTP 500, codigo
 `ERROR_INTERNO`, sin enviar trazas al navegador. La ruta de salud actual conserva
 `{"estado":"ok","mensaje":"..."}` como excepcion documentada.

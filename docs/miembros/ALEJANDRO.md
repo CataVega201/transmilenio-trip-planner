@@ -80,7 +80,7 @@ bloques, manteniendo los imports existentes utilizables.
 - No uses dict ni siquiera para guardar las filas leidas. `csv.reader` entrega
   listas; `csv.DictReader` introduce diccionarios y no debe usarse en el motor.
 - Centraliza normalizacion en carga o un ayudante de un archivo propio, y acuerda
-  su import con consumidores. Datos ya normalizados se pasan a los indices.
+  su import con consumidores. Los índices usan claves normalizadas y conservan los nombres originales del CSV.
 - Los ordenes de ruta y horarios no se suponen preordenados. Usa algoritmos
   propios y documenta la construccion. Detecta referencias y filas invalidas.
 - Exporta las firmas oficiales desde `motor/__init__.py` una vez sus imports
