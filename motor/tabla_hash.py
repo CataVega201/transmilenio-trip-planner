@@ -11,7 +11,7 @@ class TablaHash:
             if clave_guardada == clave:
                 cubeta[i] = (clave, valor)
                 return
-        if self._cantidad / len(self._cubetas) > 0.79:
+        if (self._cantidad + 1) / len(self._cubetas) > 0.79:
             self._redimensionar(len(self._cubetas) * 2)
             posicion = hash(clave) % len(self._cubetas)                
             cubeta = self._cubetas[posicion]

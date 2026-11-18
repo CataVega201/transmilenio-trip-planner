@@ -65,6 +65,17 @@ class TablaHashTests(unittest.TestCase):
         self.assertTrue(tabla.eliminar(claves[2]))
         self.assertFalse(tabla.eliminar(claves[2]))
 
+    def test_crece_antes_de_superar_el_limite_de_carga(self):
+        tabla = TablaHash()
+        for clave in range(6):
+            tabla.guardar(clave, clave)
+        self.assertEqual(len(tabla._cubetas), 8)
+        tabla.guardar(0, -1)
+        self.assertEqual(len(tabla._cubetas), 8)
+        tabla.guardar(6, 6)
+        self.assertEqual(len(tabla._cubetas), 16)
+        self.assertEqual(dict(tabla.pares()), {0: -1, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6})
+
     def test_crece_y_conserva_los_elementos(self):
         tabla = TablaHash()
         capacidad_inicial = len(tabla._cubetas)
