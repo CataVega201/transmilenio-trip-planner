@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Operacion from './components/operacion/Operacion'
 import Consultas from './components/consultas/Consultas'
 import Viajes from './components/viajes/Viajes'
+import Simulacion from './components/simulacion/Simulacion'
 import './App.css'
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
           <h2 id="herramientas-titulo" className="app-seccion-cabecera">Herramientas de viaje</h2>
           <Consultas versionRed={versionRed} />
           <Viajes versionRed={versionRed} />
+          <Simulacion />
         </section>
         <Operacion versionRed={versionRed} onCambio={() => setVersionRed(version => version + 1)} />
       </main>
