@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import Operacion from './components/operacion/Operacion'
 import Consultas from './components/consultas/Consultas'
 import Viajes from './components/viajes/Viajes'
 import './App.css'
 
 function App() {
+  const [versionRed, setVersionRed] = useState(0)
   const [conexion, setConexion] = useState('Conectando con el servidor…')
 
   useEffect(() => {
@@ -62,9 +64,10 @@ function App() {
 
         <section id="herramientas" className="app-herramientas" aria-labelledby="herramientas-titulo">
           <h2 id="herramientas-titulo" className="app-seccion-cabecera">Herramientas de viaje</h2>
-          <Consultas />
-          <Viajes />
+          <Consultas versionRed={versionRed} />
+          <Viajes versionRed={versionRed} />
         </section>
+        <Operacion versionRed={versionRed} onCambio={() => setVersionRed(version => version + 1)} />
       </main>
 
       <footer className="app-pie">
