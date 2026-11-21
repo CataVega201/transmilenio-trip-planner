@@ -19,7 +19,8 @@ Todos deben poder explicar un requisito ajeno para la sustentacion.
 - Catalina: configuracion de archivos ignorados (`e70a636`), base React y Vite
   (`8d6145b`), servidor Flask y conexion web (`44c5e03`).
 - Catalina, trabajo en revisión: índice R4 y pruebas ([PR #3](https://github.com/CataVega201/transmilenio-trip-planner/pull/3)), conversión real y validación ([PR #4](https://github.com/CataVega201/transmilenio-trip-planner/pull/4)), tema visual (c34934b) y consultas y viajes ([PR #6](https://github.com/CataVega201/transmilenio-trip-planner/pull/6)).
-- Daniel: pendientes de registrar.
+- Daniel, integrado: R10 fila de abordaje con cola FIFO propia, pruebas y decisión ([PR #8](https://github.com/CataVega201/transmilenio-trip-planner/pull/8)); pantalla de simulación ([PR #18](https://github.com/CataVega201/transmilenio-trip-planner/pull/18)); pantalla de operación con R7, R8 y R9 ([PR #19](https://github.com/CataVega201/transmilenio-trip-planner/pull/19)).
+- Daniel, trabajo en revisión: infraestructura de mediciones R11 ([PR #13](https://github.com/CataVega201/transmilenio-trip-planner/pull/13)), arranque único `iniciar.py` y pruebas de integración ([PR #20](https://github.com/CataVega201/transmilenio-trip-planner/pull/20)) y panel de rendimiento ([PR #21](https://github.com/CataVega201/transmilenio-trip-planner/pull/21)).
 - Mariana: pendientes de registrar.
 - Alejandro: pendientes de registrar.
 
