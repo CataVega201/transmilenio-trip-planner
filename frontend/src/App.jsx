@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
+import Operacion from './components/operacion/Operacion'
+import Consultas from './components/consultas/Consultas'
+import Viajes from './components/viajes/Viajes'
+import Simulacion from './components/simulacion/Simulacion'
 import './App.css'
 
 function App() {
+  const [versionRed, setVersionRed] = useState(0)
   const [conexion, setConexion] = useState('Conectando con el servidor…')
 
   useEffect(() => {
@@ -59,16 +64,12 @@ function App() {
         </section>
 
         <section id="herramientas" className="app-herramientas" aria-labelledby="herramientas-titulo">
-          <div className="app-seccion-cabecera">
-            <div><p className="app-antetitulo">EL PROYECTO</p><h2 id="herramientas-titulo">Todo tu recorrido, en un lugar</h2></div>
-            <p className="app-aviso">Estamos construyendo estas herramientas.<br />Todavía no están disponibles para consultas.</p>
-          </div>
-          <div className="app-tarjetas">
-            <article className="app-tarjeta"><span className="app-numero">01 / CONSULTA</span><h3>Encuentra tu estación</h3><p>Búsqueda por nombre, sugerencias y horarios del próximo bus.</p><span className="app-pendiente">En preparación</span></article>
-            <article className="app-tarjeta"><span className="app-numero">02 / VIAJA</span><h3>Conecta dos puntos</h3><p>Recorridos directos o con un transbordo, priorizando menos paradas.</p><span className="app-pendiente">En preparación</span></article>
-            <article className="app-tarjeta"><span className="app-numero">03 / EXPLORA</span><h3>Conoce la red</h3><p>Operación de rutas, simulación de abordaje y análisis de rendimiento.</p><span className="app-pendiente">En preparación</span></article>
-          </div>
+          <h2 id="herramientas-titulo" className="app-seccion-cabecera">Herramientas de viaje</h2>
+          <Consultas versionRed={versionRed} />
+          <Viajes versionRed={versionRed} />
+          <Simulacion />
         </section>
+        <Operacion versionRed={versionRed} onCambio={() => setVersionRed(version => version + 1)} />
       </main>
 
       <footer className="app-pie">
@@ -80,3 +81,4 @@ function App() {
 }
 
 export default App
+
