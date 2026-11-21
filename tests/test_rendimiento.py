@@ -93,12 +93,93 @@ class PruebasGenerador(unittest.TestCase):
         self.assertEqual(sorted(mezcladas), ordenadas)
 
 
+class RedFalsa:
+    """Red minima que cumple el contrato, solo para probar el medidor."""
+
+    def __init__(self, carpeta):
+        self.estaciones = sorted(f[0] for f in leer(carpeta, "estaciones.csv")[1:])
+        self.rutas = {}
+        for ruta, orden, estacion in sorted(leer(carpeta, "rutas.csv")[1:],
+                                            key=lambda f: (f[0], int(f[1]))):
+            self.rutas.setdefault(ruta, []).append(estacion)
+        self.cerradas = set()
+        self.hechas, self.deshechas = [], []
+
+    def estado(self, nombre):
+        if nombre not in self.estaciones:
+            return "NO EXISTE"
+        return "CERRADA" if nombre in self.cerradas else "ABIERTA"
+
+    def autocompletar(self, prefijo, k):
+        return [e for e in self.estaciones if e.startswith(prefijo)][:k]
+
+    def rango(self, desde, hasta):
+        return [e for e in self.estaciones if desde <= e <= hasta]
+
+    def proximo_bus(self, estacion, ruta, hora):
+        return "05:10"
+
+    def viaje(self, origen, destino):
+        return [("R0001", origen, destino)]
+
+    def ranking(self, k):
+        return [(e, 1) for e in self.estaciones[:k]]
+
+    def recorrido(self, ruta, al_reves=False):
+        lista = list(self.rutas.get(ruta, []))
+        return lista[::-1] if al_reves else lista
+
+    def agregar_parada(self, ruta, nueva, despues_de):
+        lista = self.rutas[ruta]
+        if nueva in lista or despues_de not in lista:
+            return False
+        lista.insert(lista.index(despues_de) + 1, nueva)
+        return True
+
+    def quitar_parada(self, ruta, estacion):
+        lista = self.rutas[ruta]
+        if estacion not in lista:
+            return False
+        lista.remove(estacion)
+        return True
+
+    def _cambiar(self, nombre, cerrar):
+        if nombre not in self.estaciones or (nombre in self.cerradas) == cerrar:
+            return False
+        (self.cerradas.add if cerrar else self.cerradas.discard)(nombre)
+        self.hechas.append((nombre, cerrar))
+        self.deshechas.clear()
+        return True
+
+    def cerrar(self, nombre):
+        return self._cambiar(nombre, True)
+
+    def reabrir(self, nombre):
+        return self._cambiar(nombre, False)
+
+    def deshacer(self):
+        if not self.hechas:
+            return False
+        nombre, cerro = self.hechas.pop()
+        (self.cerradas.discard if cerro else self.cerradas.add)(nombre)
+        self.deshechas.append((nombre, cerro))
+        return True
+
+    def rehacer(self):
+        if not self.deshechas:
+            return False
+        nombre, cerro = self.deshechas.pop()
+        (self.cerradas.add if cerro else self.cerradas.discard)(nombre)
+        self.hechas.append((nombre, cerro))
+        return True
+
+
 class PruebasMedidor(unittest.TestCase):
 
     def test_cronometrar_separa_preparacion(self):
         preparaciones = []
 
-        def preparar(n, _carpeta):
+        def preparar(n, _contexto):
             preparaciones.append(n)
             return list(range(n))
 
@@ -106,21 +187,17 @@ class PruebasMedidor(unittest.TestCase):
         mediana, muestras, salida = medidor.cronometrar(escenario, 100, 4, None)
         self.assertEqual(len(muestras), 4)
         self.assertGreater(mediana, 0)
-        self.assertIsNone(salida)          # sum no devuelve una lista
-        self.assertEqual(preparaciones, [100])  # no mutable: se prepara una vez
+        self.assertIsNone(salida)
+        self.assertEqual(preparaciones, [100])
 
-    def test_mutable_se_prepara_en_cada_repeticion(self):
-        preparaciones = []
-
-        def preparar(n, _carpeta):
-            preparaciones.append(n)
-            return [0] * n
-
-        escenario = medidor.Escenario("vaciar", "Rx", "elementos", preparar,
-                                      lambda lista: lista.clear(), mutable=True)
-        medidor.cronometrar(escenario, 10, 3, None, calentamiento=1)
-        # 1 inicial + 1 tras calentar + 3 repeticiones
-        self.assertEqual(len(preparaciones), 5)
+    def test_restaurar_fuera_del_tiempo_en_cada_repeticion(self):
+        eventos = []
+        escenario = medidor.Escenario(
+            "cambiar", "Rx", "elementos", lambda n, c: [0],
+            lambda estado: eventos.append("op"),
+            restaurar=lambda estado: eventos.append("restaurar"))
+        medidor.cronometrar(escenario, 1, 3, None, calentamiento=1)
+        self.assertEqual(eventos, ["op", "restaurar"] * 4)
 
     def test_pendientes_si_falta_el_modulo(self):
         original = medidor._disponibles
@@ -133,15 +210,61 @@ class PruebasMedidor(unittest.TestCase):
         for fila in filas:
             self.assertTrue(fila["estado"].startswith("pendiente"))
 
-    def test_relacion_entre_tamanos(self):
+    def test_r10_relacion_entre_tamanos(self):
         if "fila" not in medidor._disponibles():
-            self.skipTest("motor/fila.py aun no esta integrado en esta rama")
+            self.skipTest("motor/fila.py no esta disponible")
         filas = medidor.medir([2000, 4000], repeticiones=3, solo="R10")
         medidas = [f for f in filas if f["estado"] == "medido"]
         self.assertEqual(len(medidas), 4)
         self.assertIsNone(medidas[0]["relacion"])
         self.assertIsNotNone(medidas[1]["relacion"])
         self.assertEqual(medidas[0]["tamano_salida"], 2000)
+        self.assertEqual(medidas[0]["esperado"], "O(n)")
+
+    def test_todos_los_escenarios_de_red_con_red_falsa(self):
+        disponibles, crear = medidor._disponibles, medidor._crear_red
+        medidor._disponibles = lambda: ["fila", "red"]
+        medidor._crear_red = RedFalsa
+        try:
+            filas = medidor.medir([200, 400], repeticiones=2)
+        finally:
+            medidor._disponibles, medidor._crear_red = disponibles, crear
+        estados = {f["estado"] for f in filas}
+        self.assertEqual(estados, {"medido"}, [f for f in filas if f["estado"] != "medido"])
+        requisitos = {f["requisito"] for f in filas}
+        self.assertEqual(requisitos, {"carga", "R1", "R2", "R3", "R4", "R5", "R6",
+                                      "R7", "R8", "R9", "R10"})
+        operaciones = {f["operacion"] for f in filas}
+        for nombre in ("agregar_parada", "quitar_parada", "cerrar", "reabrir",
+                       "deshacer un cierre", "rehacer un cierre", "recorrido al reves"):
+            self.assertIn(nombre, operaciones)
+
+    def test_restaurar_deja_la_red_igual(self):
+        disponibles, crear = medidor._disponibles, medidor._crear_red
+        medidor._disponibles = lambda: ["red"]
+        redes = []
+        medidor._crear_red = lambda carpeta: redes.append(RedFalsa(carpeta)) or redes[-1]
+        try:
+            for requisito in ("R7", "R8", "R9"):
+                medidor.medir([100], repeticiones=3, solo=requisito)
+        finally:
+            medidor._disponibles, medidor._crear_red = disponibles, crear
+        for red in redes:
+            self.assertEqual(red.cerradas, set())
+            self.assertEqual(len(red.recorrido("R0001")), 20)
+
+    def test_medir_api_valida_limites(self):
+        for tamanos, repeticiones in [([], 3), ([0], 3), ([10**6], 3), ("100", 3),
+                                      ([100] * 6, 3), ([100], 0), ([100], 10),
+                                      ([True], 3), ([100], 2.5)]:
+            with self.subTest(tamanos=tamanos, repeticiones=repeticiones):
+                with self.assertRaises(ValueError):
+                    medidor.medir_api(tamanos, repeticiones)
+
+    def test_medir_api_devuelve_json(self):
+        import json
+        filas = medidor.medir_api([500], 1)
+        self.assertEqual(json.loads(json.dumps(filas)), filas)
 
 
 if __name__ == "__main__":
