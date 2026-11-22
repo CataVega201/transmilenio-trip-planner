@@ -45,3 +45,17 @@ terminadas de R1 a R10. No se presentan propuestas como decisiones ya probadas.
 
 Todo el proyecto se desarrolla localmente. No requiere cuentas de IA, claves
 de API, alojamiento ni servicios de pago para funcionar.
+
+## Integración de Red
+
+Se puede importar `Red` desde `motor` y cargar `Red("datos")` o
+`Red("datos_generados")`. Ya están conectadas las consultas de estado,
+horarios y viajes, edición de rutas, cierres, reaperturas y deshacer/rehacer.
+R2, R3 y R6 dependen aún de los índices de Mariana y responden como módulos
+pendientes en la API.
+
+- [Carga y complejidad de construcción](docs/decisiones/CARGA_RED.md)
+- [Viajes R5](docs/decisiones/R5.md)
+- [Cierres e integración R8/R9](docs/decisiones/R8.md)
+
+Pruebas de la integración: `python -m unittest discover -s tests`.
