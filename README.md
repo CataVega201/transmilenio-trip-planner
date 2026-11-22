@@ -97,3 +97,9 @@ R2, R3 y R6 usan los índices alfabéticos y de ranking actualizados con cada ca
 - [Cierres e integración R8/R9](docs/decisiones/R8.md)
 
 Pruebas de la integración: `python -m unittest discover -s tests`.
+
+## Publicación en internet
+
+El repositorio incluye `render.yaml` y `produccion.py` para desplegar la app
+completa en el plan gratuito de Render. [Instrucciones](docs/DESPLIEGUE.md).
+La URL pública se registrará cuando el servicio esté desplegado y comprobado.
