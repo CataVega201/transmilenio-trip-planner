@@ -90,8 +90,10 @@ class PruebasServidor(unittest.TestCase):
             (dist / "index.html").write_text("<h1>planeador</h1>", encoding="utf-8")
             (dist / "assets" / "app.js").write_text("console.log(1)", encoding="utf-8")
             cliente = iniciar.crear_aplicacion(iniciar.RAIZ / "datos", dist).test_client()
-            self.assertIn(b"planeador", cliente.get("/").data)
-            self.assertEqual(cliente.get("/assets/app.js").status_code, 200)
+            with cliente.get("/") as respuesta:
+                self.assertIn(b"planeador", respuesta.data)
+            with cliente.get("/assets/app.js") as respuesta:
+                self.assertEqual(respuesta.status_code, 200)
             self.assertEqual(cliente.get("/api/estado").json["estado"], "ok")
 
     def test_main_devuelve_1_con_error_claro(self):
