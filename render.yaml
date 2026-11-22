@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: transmilenio-trip-planner
+    runtime: python
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt && npm --prefix frontend ci && npm --prefix frontend run build
+    startCommand: python produccion.py
+    healthCheckPath: /api/estado
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.0
+      - key: NODE_VERSION
+        value: "24"
+      - key: PYTHONUNBUFFERED
+        value: "1"
