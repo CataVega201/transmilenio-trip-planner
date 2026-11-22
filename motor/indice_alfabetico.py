@@ -30,5 +30,3 @@ def _primer_indice(lista, elemento):
         else:
             alto = medio
     return bajo
-
-

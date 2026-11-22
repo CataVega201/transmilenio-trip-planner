@@ -18,7 +18,7 @@ def _normalizar(nombre):
 def _validar_texto(valor, nombre):
     if not isinstance(valor, str):
         raise TypeError(f"{nombre} debe ser texto")
-    
+
 class _Estacion:
     def __init__(self, nombre):
         self.nombre = nombre
@@ -58,9 +58,9 @@ class IndiceEstaciones:
             self._abiertas.eliminar(clave)
         registro.abierta = abierta
         return True
-    
+
     def autocompletar(self, prefijo, k):
-        
+
         _validar_texto(prefijo, "prefijo")
         if isinstance(k, bool) or not isinstance(k, int):
             raise TypeError("k debe ser un entero")
