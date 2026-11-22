@@ -23,5 +23,6 @@ La primera visita puede tardar aproximadamente un minuto tras 15 minutos sin
 actividad en el plan gratuito. Los cambios de red se pierden al reiniciar.
 Una sola medición R11 se ejecuta a la vez; las demás reciben un aviso 429.
 
-La URL definitiva debe registrarse en la sección App desplegada del README
-una vez verificada públicamente. El despliegue está pendiente hasta tener esa URL.
+URL comprobada: https://transmilenio-trip-planner.onrender.com/
+El servicio gratuito se creó desde el repositorio público, rama main.
+Si Render no recibe automáticamente un cambio posterior, usa Manual Deploy > Deploy latest commit.

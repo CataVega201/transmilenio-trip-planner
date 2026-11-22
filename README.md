@@ -98,8 +98,15 @@ R2, R3 y R6 usan los índices alfabéticos y de ranking actualizados con cada ca
 
 Pruebas de la integración: `python -m unittest discover -s tests`.
 
-## Publicación en internet
+## App desplegada
 
-El repositorio incluye `render.yaml` y `produccion.py` para desplegar la app
-completa en el plan gratuito de Render. [Instrucciones](docs/DESPLIEGUE.md).
-La URL pública se registrará cuando el servicio esté desplegado y comprobado.
+https://transmilenio-trip-planner.onrender.com/
+
+El enlace ejecuta React y el motor Python en Render, sin instalar programas
+para visitarlo. En el plan gratuito, la primera visita después de 15 minutos
+sin actividad puede tardar aproximadamente un minuto en despertar el servidor.
+Las ediciones y el historial son compartidos y se reinician al reiniciar el servicio.
+R11 puede tardar varios minutos en redes grandes por los recursos del plan gratuito.
+
+La configuración está en `render.yaml` y `produccion.py`.
+[Instrucciones y límites del despliegue](docs/DESPLIEGUE.md).
