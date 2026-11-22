@@ -1,0 +1,44 @@
+.rendimiento-panel { padding: clamp(1rem, 4vw, 2rem); border: 1px solid var(--color-borde); border-radius: var(--radio); background: var(--color-superficie); margin-bottom: var(--espacio-6); }
+.rendimiento-nota { color: var(--color-secundario); font-size: .9rem; margin: var(--espacio-2) 0 0; }
+
+.rendimiento-form { display: flex; flex-wrap: wrap; gap: var(--espacio-4); align-items: end; margin-top: var(--espacio-4); }
+.rendimiento-form fieldset { display: flex; flex-wrap: wrap; gap: var(--espacio-3); margin: 0; padding: 0; border: 0; }
+.rendimiento-form legend { font-weight: 600; margin-bottom: var(--espacio-2); }
+.rendimiento-form fieldset label { display: flex; align-items: center; gap: var(--espacio-2); min-height: 2.75rem; }
+.rendimiento-repeticiones { display: grid; gap: var(--espacio-0-3); font-weight: 600; }
+.rendimiento-form select { min-height: 2.75rem; border: 1px solid var(--color-borde); border-radius: var(--espacio-0-4); padding: var(--espacio-2); background: var(--color-superficie); color: var(--color-texto); font: inherit; }
+.rendimiento-form button { min-height: 2.75rem; border: 0; border-radius: var(--espacio-2); padding: var(--espacio-2) var(--espacio-1-25); background: var(--color-marca); color: var(--color-superficie); cursor: pointer; font: inherit; }
+.rendimiento-form button:disabled { opacity: .55; cursor: not-allowed; }
+.rendimiento-panel :focus-visible { outline: 3px solid var(--color-foco); outline-offset: 2px; }
+
+.rendimiento-mensaje { margin: var(--espacio-4) 0 0; padding: var(--espacio-3); background: var(--color-fondo); border-radius: var(--espacio-2); }
+.rendimiento-error { color: var(--color-marca); }
+
+.rendimiento-operacion { margin-top: var(--espacio-4); padding: var(--espacio-4); background: var(--color-fondo); border-radius: var(--espacio-2); }
+.rendimiento-operacion h3 { margin: 0; font-size: 1.05rem; }
+.rendimiento-req { display: inline-block; padding: 0 var(--espacio-2); margin-right: var(--espacio-2); border-radius: var(--espacio-0-4); background: var(--color-marca-suave); }
+.rendimiento-cuerpo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--espacio-4); margin-top: var(--espacio-3); align-items: start; }
+.rendimiento-explicacion p { margin: 0 0 var(--espacio-2); }
+
+.rendimiento-tabla-contenedor { overflow: auto; border: 1px solid var(--color-borde); border-radius: var(--espacio-0-4); background: var(--color-superficie); }
+.rendimiento-tabla { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.rendimiento-tabla th, .rendimiento-tabla td { padding: var(--espacio-2); text-align: right; border-top: 1px solid var(--color-borde); white-space: nowrap; }
+.rendimiento-tabla th { background: var(--color-marca-suave); }
+
+.rendimiento-grafica { margin: 0; }
+.rendimiento-grafica svg { width: 100%; height: auto; background: var(--color-superficie); border-radius: var(--espacio-0-4); }
+.rendimiento-grafica text { font-size: 10px; fill: var(--color-secundario); }
+.rendimiento-eje { stroke: var(--color-borde); }
+.rendimiento-linea { fill: none; stroke: var(--color-marca); stroke-width: 2.5; }
+.rendimiento-referencia { fill: none; stroke: var(--color-secundario); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.rendimiento-punto { fill: var(--color-marca); }
+.rendimiento-grafica figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: var(--espacio-2); font-size: .85rem; color: var(--color-secundario); margin-top: var(--espacio-2); }
+.rendimiento-clave { display: inline-block; width: 1.25rem; border-top: 3px solid var(--color-marca); }
+.rendimiento-clave-referencia { border-top: 2px dashed var(--color-secundario); }
+.rendimiento-grafica figcaption > span { display: inline-flex; align-items: center; gap: var(--espacio-1); margin-right: var(--espacio-3); }
+
+.rendimiento-pendientes { margin-top: var(--espacio-4); }
+.rendimiento-pendientes h3 { font-size: 1rem; margin: 0; }
+.rendimiento-pendientes ul { margin: var(--espacio-2) 0 0; padding-left: 1.25rem; color: var(--color-secundario); }
+
+@media (max-width: 600px) { .rendimiento-form { display: grid; } }

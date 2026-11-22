@@ -20,22 +20,25 @@ Alejandro Curtidor y Daniel Rincon.
 
 React y Flask funcionan en main. El progreso de cada rama y las dependencias para integrar el motor se encuentran en la [guía general](docs/GUIA_GENERAL.md). Las pruebas del conversor ya incluyen el GTFS real de julio de 2021. Cada integrante debe revisar e integrar los cambios del equipo antes de usar esas funciones desde main.
 
-## Ejecutar la base actual
+## Ejecutar la app
 
-Primero sigue [la instalacion](docs/INSTALACION.md). En la carpeta principal
-del repositorio, abre dos terminales Command Prompt:
+Sigue primero [la instalación](docs/INSTALACION.md), instala las dependencias
+de Python y del frontend y ejecuta desde la carpeta del proyecto:
+
+```cmd
+.\.venv\Scripts\python.exe iniciar.py --datos datos
+```
+
+El comando compila el frontend y sirve página y API en un mismo servidor.
+Para omitir la apertura del navegador usa `--no-abrir`. Para cambiar el puerto
+usa `--puerto 5001`. `--sin-compilar` reutiliza una compilación existente.
+
+Desarrollo con recarga automática en dos terminales:
 
 ```cmd
 .\.venv\Scripts\python.exe servidor.py
-```
-
-```cmd
 npm --prefix frontend run dev
 ```
-
-Abre la direccion Local que indique Vite. Actualmente se usan dos comandos.
-Daniel implementara y documentara el comando unico de arranque exigido para
-la entrega; todavia no existe.
 
 ## Decisiones del curso R12
 
@@ -45,3 +48,17 @@ terminadas de R1 a R10. No se presentan propuestas como decisiones ya probadas.
 
 Todo el proyecto se desarrolla localmente. No requiere cuentas de IA, claves
 de API, alojamiento ni servicios de pago para funcionar.
+
+## Integración de Red
+
+Se puede importar `Red` desde `motor` y cargar `Red("datos")` o
+`Red("datos_generados")`. Ya están conectadas las consultas de estado,
+horarios y viajes, edición de rutas, cierres, reaperturas y deshacer/rehacer.
+R2, R3 y R6 dependen aún de los índices de Mariana y responden como módulos
+pendientes en la API.
+
+- [Carga y complejidad de construcción](docs/decisiones/CARGA_RED.md)
+- [Viajes R5](docs/decisiones/R5.md)
+- [Cierres e integración R8/R9](docs/decisiones/R8.md)
+
+Pruebas de la integración: `python -m unittest discover -s tests`.

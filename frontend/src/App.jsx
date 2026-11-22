@@ -3,6 +3,7 @@ import Operacion from './components/operacion/Operacion'
 import Consultas from './components/consultas/Consultas'
 import Viajes from './components/viajes/Viajes'
 import Simulacion from './components/simulacion/Simulacion'
+import Rendimiento from './components/rendimiento/Rendimiento'
 import './App.css'
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
           <Simulacion />
         </section>
         <Operacion versionRed={versionRed} onCambio={() => setVersionRed(version => version + 1)} />
+        <Rendimiento />
       </main>
 
       <footer className="app-pie">

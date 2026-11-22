@@ -34,3 +34,7 @@ la identidad de Git para simular que trabajo otra persona.
 El reparto se revisara tras la primera ronda: Alejandro concentra las
 dependencias del motor y Catalina asume tambien datos e integracion. Si una
 parte crece, se reasigna una tarea concreta y su archivo antes de empezarla.
+
+## Reasignación de integración
+
+Catalina asume la carga CSV, la fachada Red, viajes R5 y la coordinación de cierres con historial R8/R9 por disponibilidad del equipo el día de entrega. Reutiliza los módulos de rutas e historial y sus commits originales de Alejandro, el índice de estaciones de Mariana y la simulación de Daniel. R2/R3/R6 siguen asignados a Mariana.
