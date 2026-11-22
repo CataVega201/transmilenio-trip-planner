@@ -7,6 +7,7 @@ import Rendimiento from './components/rendimiento/Rendimiento'
 import './App.css'
 
 function App() {
+  const [modo, setModo] = useState('cliente')
   const [versionRed, setVersionRed] = useState(0)
   const [conexion, setConexion] = useState('Conectando con el servidor…')
 
@@ -65,13 +66,20 @@ function App() {
         </section>
 
         <section id="herramientas" className="app-herramientas" aria-labelledby="herramientas-titulo">
+          <div className="app-modos" role="group" aria-label="Modo de uso">
+            <button type="button" aria-pressed={modo === 'cliente'} onClick={() => setModo('cliente')}>Cliente</button>
+            <button type="button" aria-pressed={modo === 'operador'} onClick={() => setModo('operador')}>Operador</button>
+          </div>
           <h2 id="herramientas-titulo" className="app-seccion-cabecera">Herramientas de viaje</h2>
           <Consultas versionRed={versionRed} />
           <Viajes versionRed={versionRed} />
-          <Simulacion />
+
         </section>
-        <Operacion versionRed={versionRed} onCambio={() => setVersionRed(version => version + 1)} />
-        <Rendimiento />
+        <div id="herramientas-operador" hidden={modo !== 'operador'}>
+          <Operacion versionRed={versionRed} onCambio={() => setVersionRed(version => version + 1)} />
+          <Simulacion />
+          <Rendimiento />
+        </div>
       </main>
 
       <footer className="app-pie">

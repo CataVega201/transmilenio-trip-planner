@@ -110,3 +110,14 @@ R11 puede tardar varios minutos en redes grandes por los recursos del plan gratu
 
 La configuración está en `render.yaml` y `produccion.py`.
 [Instrucciones y límites del despliegue](docs/DESPLIEGUE.md).
+
+## Vistas de cliente y operador
+
+El selector Cliente/Operador está en Herramientas de viaje. Cliente muestra
+consultas y viajes. Operador añade edición de recorridos, cierres/reaperturas
+de estaciones, deshacer/rehacer, simulación y rendimiento. Los formularios y
+resultados se conservan al cambiar de vista. Es una selección de interfaz para
+la demostración académica, sin cuentas ni permisos: cualquier visitante puede
+elegir Operador y los cambios afectan la red compartida.
+
+[Pruebas de estrés y contraste con la rúbrica](docs/PRUEBAS_ESTRES.md).
