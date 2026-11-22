@@ -12,7 +12,7 @@ Admite BOM UTF-8, rutas de carpeta con espacios, horas mayores de 23 y eventos
 duplicados. Los eventos duplicados cuentan como buses distintos.
 
 Con n estaciones, p paradas de rutas y h horarios, la construcción usa
-O(n + p log p + h log h) esperado en tiempo y O(n + p + h) espacio,
+O(n log n + p log p + h log h) esperado en tiempo y O(n + p + h) espacio,
 incluidos los arreglos auxiliares de ordenación. Las colisiones pueden empeorar
 las operaciones hash. El orden de rutas se compara numéricamente; cada ruta
 mantiene su sentido. Una carga fallida no publica una red parcialmente cargada.
@@ -27,4 +27,4 @@ Son observaciones preliminares y no medianas oficiales ni una garantía entre
 máquinas. Ambos conjuntos CSV reales cargaron en aproximadamente 0,6 s.
 
 Exportación pública: from motor import Red, simular_fila.
-El contrato completo aún requiere los índices R2, R3 y R6 de Mariana.
+El contrato incluye los índices alfabéticos R2/R3 y el ranking incremental R6.

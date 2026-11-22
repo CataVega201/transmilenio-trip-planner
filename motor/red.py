@@ -4,6 +4,7 @@ from .estaciones import IndiceEstaciones, _normalizar
 from .historial import Historial
 from .horarios import IndiceHorarios, hora_a_minutos
 from .rutas import AlmacenRutas
+from .ranking import IndiceRanking
 from .tabla_hash import TablaHash
 from .viajes import planear_viaje
 
@@ -28,6 +29,7 @@ class Red:
             self._conteos.guardar(nombre, 0)
         for _, nombre, _ in datos.horarios:
             self._conteos.guardar(nombre, self._conteos.obtener(nombre) + 1)
+        self._ranking = IndiceRanking(self._conteos.pares())
 
     def _estacion(self, nombre):
         return self._nombres.obtener(_normalizar(nombre))
@@ -39,16 +41,10 @@ class Red:
         return self._estaciones.estado(nombre)
 
     def autocompletar(self, prefijo, k):
-        funcion = getattr(self._estaciones, "autocompletar", None)
-        if funcion is None:
-            raise ModuloPendiente("Falta integrar el índice de autocompletado R2.")
-        return funcion(prefijo, k)
+        return self._estaciones.autocompletar(prefijo, k)
 
     def rango(self, desde, hasta):
-        funcion = getattr(self._estaciones, "rango", None)
-        if funcion is None:
-            raise ModuloPendiente("Falta integrar el índice de rangos R3.")
-        return funcion(desde, hasta)
+        return self._estaciones.rango(desde, hasta)
 
     def conteos_vigentes(self):
         """Adaptador para R6. Incluye solo abiertas y eventos de rutas vigentes."""
@@ -59,7 +55,7 @@ class Red:
         return filas
 
     def ranking(self, k):
-        raise ModuloPendiente("Falta integrar el índice de ranking R6.")
+        return self._ranking.ranking(k)
 
     def proximo_bus(self, estacion, ruta, hora):
         hora_a_minutos(hora)
@@ -83,7 +79,10 @@ class Red:
         return planear_viaje(self._rutas, self._estaciones, inicio, fin)
 
     def _cambiar_estado(self, nombre, abierta):
-        return self._estaciones.cambiar_estado(nombre, abierta)
+        if not self._estaciones.cambiar_estado(nombre, abierta):
+            return False
+        self._ranking.actualizar_estacion(nombre, self._conteos.obtener(nombre), abierta)
+        return True
 
     def _estado_publico(self, nombre, abierta):
         original = self._estacion(nombre)
@@ -109,6 +108,7 @@ class Red:
         if cambio:
             cantidad = self._horarios.cantidad(estacion, ruta)
             self._conteos.guardar(estacion, self._conteos.obtener(estacion) + cantidad)
+            self._ranking.actualizar_estacion(estacion, self._conteos.obtener(estacion), self.estado(estacion) == "ABIERTA")
         return cambio
 
     def _quitar(self, ruta, estacion):
@@ -116,6 +116,7 @@ class Red:
             return False
         cantidad = self._horarios.cantidad(estacion, ruta)
         self._conteos.guardar(estacion, self._conteos.obtener(estacion) - cantidad)
+        self._ranking.actualizar_estacion(estacion, self._conteos.obtener(estacion), self.estado(estacion) == "ABIERTA")
         return True
 
     def agregar_parada(self, ruta, nueva, despues_de):

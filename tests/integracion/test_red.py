@@ -22,11 +22,7 @@ import random
 import tempfile
 import unittest
 
-try:
-    from motor import Red
-    from motor.red import ModuloPendiente
-except ImportError:
-    Red = None
+from motor import Red
 
 ESTACIONES = ["ALFA", "BRAVO", "CHARLIE", "DELTA", "ECO", "FOXTROT", "GOLF", "HOTEL", "INDIA"]
 RUTAS = {
@@ -63,7 +59,6 @@ def escribir_red(carpeta):
             escritor.writerows(filas)
 
 
-@unittest.skipIf(Red is None, "motor.Red aun no esta integrada en main")
 class PruebasRed(unittest.TestCase):
 
     def setUp(self):
@@ -72,24 +67,6 @@ class PruebasRed(unittest.TestCase):
         os.makedirs(carpeta)
         escribir_red(carpeta)
         self.red = Red(carpeta)
-
-        # Red puede integrarse por bloques. Solo se omiten pruebas que necesitan
-        # un índice explícitamente pendiente; cualquier otro fallo sigue fallando.
-        consultas = {
-            "test_nombres_normalizados_al_consultar": [("autocompletar", ("", 1))],
-            "test_autocompletar_y_rango": [("autocompletar", ("", 1)), ("rango", ("A", "Z"))],
-            "test_ranking": [("ranking", (1,))],
-            "test_cerrar_afecta_todas_las_consultas": [("autocompletar", ("", 1)), ("rango", ("A", "Z")), ("ranking", (1,))],
-            "test_reabrir": [("autocompletar", ("", 1))],
-            "test_quitar_parada_desactiva_sus_horarios_y_su_ranking": [("ranking", (1,))],
-            "test_nueva_parada_no_inventa_horarios": [("ranking", (1,))],
-            "test_respuestas_son_datos_simples": [("autocompletar", ("", 1)), ("rango", ("A", "Z")), ("ranking", (1,))],
-        }
-        for metodo, argumentos in consultas.get(self._testMethodName, []):
-            try:
-                getattr(self.red, metodo)(*argumentos)
-            except ModuloPendiente as error:
-                self.skipTest(str(error))
 
     def tearDown(self):
         self.tmp.cleanup()

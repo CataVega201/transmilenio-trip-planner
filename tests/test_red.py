@@ -6,7 +6,6 @@ import unittest
 from pathlib import Path
 
 from motor import Red
-from motor.red import ModuloPendiente
 from servidor import crear_app
 
 
@@ -156,7 +155,7 @@ class RedTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             self.red()
 
-    def test_api_real_y_consultas_pendientes(self):
+    def test_api_real_y_consultas_completas(self):
         c = crear_app(carpeta_datos=str(self.carpeta)).test_client()
         self.assertEqual(c.get("/api/estaciones/estado?nombre=alfa").json["datos"], "ABIERTA")
         self.assertEqual(c.get("/api/viajes?origen=alfa&destino=destino").json["datos"],
@@ -167,8 +166,8 @@ class RedTests(unittest.TestCase):
         for url in ["/api/estaciones/autocompletar?prefijo=A&k=5",
                     "/api/estaciones/rango?desde=A&hasta=Z", "/api/ranking?k=5"]:
             respuesta = c.get(url)
-            self.assertEqual(respuesta.status_code, 503)
-            self.assertEqual(respuesta.json["error"]["codigo"], "MODULO_PENDIENTE")
+            self.assertEqual(respuesta.status_code, 200)
+            self.assertTrue(respuesta.json["ok"])
 
     def test_viajes_aleatorios_con_referencia_exhaustiva(self):
         azar = random.Random(194)
