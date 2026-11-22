@@ -20,22 +20,25 @@ Alejandro Curtidor y Daniel Rincon.
 
 React y Flask funcionan en main. El progreso de cada rama y las dependencias para integrar el motor se encuentran en la [guía general](docs/GUIA_GENERAL.md). Las pruebas del conversor ya incluyen el GTFS real de julio de 2021. Cada integrante debe revisar e integrar los cambios del equipo antes de usar esas funciones desde main.
 
-## Ejecutar la base actual
+## Ejecutar la app
 
-Primero sigue [la instalacion](docs/INSTALACION.md). En la carpeta principal
-del repositorio, abre dos terminales Command Prompt:
+Sigue primero [la instalación](docs/INSTALACION.md), instala las dependencias
+de Python y del frontend y ejecuta desde la carpeta del proyecto:
+
+```cmd
+.\.venv\Scripts\python.exe iniciar.py --datos datos
+```
+
+El comando compila el frontend y sirve página y API en un mismo servidor.
+Para omitir la apertura del navegador usa `--no-abrir`. Para cambiar el puerto
+usa `--puerto 5001`. `--sin-compilar` reutiliza una compilación existente.
+
+Desarrollo con recarga automática en dos terminales:
 
 ```cmd
 .\.venv\Scripts\python.exe servidor.py
-```
-
-```cmd
 npm --prefix frontend run dev
 ```
-
-Abre la direccion Local que indique Vite. Actualmente se usan dos comandos.
-Daniel implementara y documentara el comando unico de arranque exigido para
-la entrega; todavia no existe.
 
 ## Decisiones del curso R12
 
