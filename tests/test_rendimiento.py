@@ -267,5 +267,18 @@ class PruebasMedidor(unittest.TestCase):
         self.assertEqual(json.loads(json.dumps(filas)), filas)
 
 
+
+
+
+class PruebasDependenciasPendientes(unittest.TestCase):
+    def test_indice_pendiente_no_se_presenta_como_fallo_del_motor(self):
+        from unittest.mock import patch
+        from motor.red import ModuloPendiente
+        with patch.object(medidor, "cronometrar", side_effect=ModuloPendiente("índice sin integrar")):
+            filas = medidor.medir([10], 1, solo="R1")
+        self.assertEqual(len(filas), 1)
+        self.assertEqual(filas[0]["estado"], "pendiente: índice sin integrar")
+
+
 if __name__ == "__main__":
     unittest.main()

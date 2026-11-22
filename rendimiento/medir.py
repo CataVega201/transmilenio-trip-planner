@@ -25,6 +25,8 @@ Uso desde la terminal:
 Uso desde el servidor (panel web): medir_api(tamanos, repeticiones).
 """
 
+from motor.red import ModuloPendiente
+
 import argparse
 import json
 import os
@@ -305,6 +307,10 @@ def medir(tamanos, repeticiones=5, solo=None):
                 try:
                     mediana, muestras, salida = cronometrar(
                         escenario, n, repeticiones, contexto)
+                except ModuloPendiente as error:
+                    filas.append(dict(base, estado="pendiente: %s" % error, n=n))
+                    anterior = None
+                    continue
                 except Exception as error:  # el autor debe revisar su operacion
                     filas.append(dict(base, estado="error: %s" % error, n=n))
                     anterior = None
