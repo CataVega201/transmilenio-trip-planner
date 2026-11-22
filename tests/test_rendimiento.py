@@ -280,5 +280,23 @@ class PruebasDependenciasPendientes(unittest.TestCase):
         self.assertEqual(filas[0]["estado"], "pendiente: índice sin integrar")
 
 
+class PruebasMemoriaPublica(unittest.TestCase):
+    def test_no_conserva_otras_redes_al_cambiar_de_tamano(self):
+        from unittest.mock import patch
+        vistos = []
+        def preparar(n, contexto):
+            self.assertTrue(set(contexto.redes).issubset({n}))
+            vistos.append(n)
+            return contexto.red(n)
+        escenario = medidor.Escenario("estado", "R1", "estaciones", preparar,
+                                      lambda r: r.estado("EST 000001"), necesita="red")
+        with patch.object(medidor, "escenarios", return_value=[escenario]):
+            filas = medidor.medir([10, 20], 1)
+        self.assertEqual([f["n"] for f in filas], [10, 20])
+        self.assertTrue(all(f["estado"] == "medido" for f in filas))
+        self.assertIn(10, vistos)
+        self.assertIn(20, vistos)
+
+
 if __name__ == "__main__":
     unittest.main()

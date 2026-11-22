@@ -28,6 +28,7 @@ Uso desde el servidor (panel web): medir_api(tamanos, repeticiones).
 from motor.red import ModuloPendiente
 
 import argparse
+import gc
 import json
 import os
 import statistics
@@ -291,46 +292,45 @@ def medir(tamanos, repeticiones=5, solo=None):
     Las filas no medidas solo tienen operacion, requisito, estado y nota.
     """
     hay = _disponibles()
-    filas = []
+    seleccionados = [e for e in escenarios() if not solo or e.requisito == solo]
+    grupos = [[] for _ in seleccionados]
+    anteriores = [None] * len(seleccionados)
     with tempfile.TemporaryDirectory(prefix="r11_") as carpeta_tmp:
         contexto = Contexto(carpeta_tmp)
-        for escenario in escenarios():
-            if solo and escenario.requisito != solo:
-                continue
-            base = {"operacion": escenario.nombre, "requisito": escenario.requisito,
-                    "esperado": escenario.esperado, "nota": escenario.nota}
-            if escenario.necesita and escenario.necesita not in hay:
-                filas.append(dict(base, estado=FALTAN[escenario.necesita]))
-                continue
-            anterior = None
-            for n in tamanos:
+        # Medir todas las operaciones de n antes de cargar 2n mantiene una
+        # sola red en caché. La liberación queda fuera del tiempo medido.
+        for n in tamanos:
+            for i, escenario in enumerate(seleccionados):
+                base = {"operacion": escenario.nombre, "requisito": escenario.requisito,
+                        "esperado": escenario.esperado, "nota": escenario.nota}
+                if escenario.necesita and escenario.necesita not in hay:
+                    if not grupos[i]:
+                        grupos[i].append(dict(base, estado=FALTAN[escenario.necesita]))
+                    continue
                 try:
                     mediana, muestras, salida = cronometrar(
                         escenario, n, repeticiones, contexto)
                 except ModuloPendiente as error:
-                    filas.append(dict(base, estado="pendiente: %s" % error, n=n))
-                    anterior = None
+                    grupos[i].append(dict(base, estado="pendiente: %s" % error, n=n))
+                    anteriores[i] = None
                     continue
-                except Exception as error:  # el autor debe revisar su operacion
-                    filas.append(dict(base, estado="error: %s" % error, n=n))
-                    anterior = None
+                except Exception as error:
+                    grupos[i].append(dict(base, estado="error: %s" % error, n=n))
+                    anteriores[i] = None
                     continue
-                filas.append(dict(
-                    base,
-                    estado="medido",
-                    n=n,
-                    unidad=escenario.unidad,
-                    k=escenario.k,
-                    repeticiones=repeticiones,
-                    mediana_ns=int(mediana),
-                    min_ns=min(muestras),
-                    max_ns=max(muestras),
-                    tamano_salida=salida,
+                anterior = anteriores[i]
+                grupos[i].append(dict(
+                    base, estado="medido", n=n, unidad=escenario.unidad,
+                    k=escenario.k, repeticiones=repeticiones,
+                    mediana_ns=int(mediana), min_ns=min(muestras),
+                    max_ns=max(muestras), tamano_salida=salida,
                     relacion=None if not anterior else round(mediana / anterior, 2),
                     cache="caliente (tras calentamiento)",
                 ))
-                anterior = mediana
-    return filas
+                anteriores[i] = mediana
+            contexto.redes.clear()
+            gc.collect()
+    return [fila for grupo in grupos for fila in grupo]
 
 
 def medir_api(tamanos, repeticiones):
