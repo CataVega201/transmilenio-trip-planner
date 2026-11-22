@@ -5,6 +5,7 @@ from threading import RLock
 
 from flask import Flask, jsonify, request, send_from_directory
 from werkzeug.exceptions import HTTPException
+from motor.red import ModuloPendiente
 
 
 # URL, operación pública y campos en su orden contractual.
@@ -131,7 +132,7 @@ def crear_app(carpeta_datos=None, carpeta_web=None, *, red=None, simular=None, m
 
     @app.errorhandler(Exception)
     def error(error):
-        if isinstance(error, Pendiente):
+        if isinstance(error, (Pendiente, ModuloPendiente)):
             estado, codigo = 503, "MODULO_PENDIENTE"
             mensaje = str(error) or "Esta función estará disponible al integrar el módulo del equipo."
         elif isinstance(error, EntradaInvalida) or (
