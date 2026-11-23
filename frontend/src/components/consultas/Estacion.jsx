@@ -18,7 +18,7 @@ export default function Estacion({ etiqueta, nombre, versionRed }) {
   }, [texto, versionRed])
   const lista = sugerencia?.texto === texto && sugerencia?.versionRed === versionRed ? sugerencia.lista : []
   return <label>{etiqueta}
-    <input name={nombre} required list={id} value={texto} onChange={e => cambiar(e.target.value)} autoComplete="off" />
+    <input name={nombre} required list={id} value={texto} onChange={e => cambiar(e.target.value)} autoComplete="off" placeholder="Escribe el nombre de la estación" />
     <datalist id={id}>{lista.map(n => <option key={n} value={n} />)}</datalist>
   </label>
 }

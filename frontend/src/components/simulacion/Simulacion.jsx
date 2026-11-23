@@ -183,7 +183,7 @@ function Resultado({ llegadas, salidas, frecuencia, capacidad, resumen, pagina, 
         Buses cada {frecuencia} s con cupo de {capacidad}. La tabla sigue el orden en que escribiste las llegadas.
       </p>
 
-      <div className="fila-tabla-contenedor" tabIndex={0} aria-label="Detalle por pasajero">
+      <div className="fila-tabla-contenedor" role="region" tabIndex={0} aria-label="Detalle por pasajero">
         <table className="fila-tabla">
           <caption>Mostrando pasajeros {inicio + 1} a {fin} de {salidas.length.toLocaleString('es-CO')}</caption>
           <thead><tr><th scope="col">#</th><th scope="col">Llega (s)</th><th scope="col">Sale su bus (s)</th><th scope="col">Espera</th></tr></thead>

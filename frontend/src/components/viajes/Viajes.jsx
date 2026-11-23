@@ -10,11 +10,12 @@ export default function Viajes({ versionRed = 0 }) {
     const datos = new FormData(e.currentTarget)
     consultar(() => planearViaje(datos.get('origen'), datos.get('destino')))
   }
-  return <section className="viaje-panel"><h2>Planear un viaje</h2>
-    <form className="viaje-form" onSubmit={enviar}>
+  return <section className="viaje-panel" aria-labelledby="viajes-titulo"><h2 id="viajes-titulo">Planear un viaje</h2>
+    <p className="herramienta-ayuda">Escribe de dónde sales y a dónde vas. Busca el recorrido con menos paradas, directo o con un transbordo.</p>
+    <form className="viaje-form" onSubmit={enviar} aria-label="Buscar un viaje">
       <Estacion etiqueta="Origen" nombre="origen" versionRed={versionRed} />
       <Estacion etiqueta="Destino" nombre="destino" versionRed={versionRed} />
-      <button>Buscar recorrido</button>
+      <button disabled={cargando}>Buscar recorrido</button>
     </form>
     <div className="viaje-resultado" role="status">
       {cargando && 'Buscando recorrido…'}{salida?.error}

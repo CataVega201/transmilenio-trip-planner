@@ -1,9 +1,42 @@
 @import './styles/tema.css';
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--color-fondo); color: var(--color-texto); font-family: var(--fuente); line-height: 1.6; }
+html { scroll-padding-top: 1.5rem; }
+body { margin: 0; background: radial-gradient(ellipse at 0 0, #f8e9ec70, transparent 40rem), var(--color-fondo); color: var(--color-texto); font-family: var(--fuente); line-height: 1.6; }
 a { color: inherit; }
 button, input, select, textarea { font: inherit; }
-:focus-visible { outline: 3px solid var(--color-foco); outline-offset: 5px; }
+button, summary, a { -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea, summary { touch-action: manipulation; }
+:focus-visible { outline: 3px solid var(--color-foco); outline-offset: 4px; }
 h1, h2, h3, p { margin: 0; }
-html { scroll-padding-top: 2rem; }
+.solo-lectores { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.herramienta-ayuda { color: var(--color-secundario); font-size: .9rem; max-width: 50rem; }
+[hidden] { display: none !important; }
+img, svg { max-width: 100%; }
+main, section, form, fieldset, figure { min-width: 0; }
+p, li, dd, h1, h2, h3, strong { overflow-wrap: anywhere; }
+input:not([type='checkbox']):not([type='radio']), select, textarea { font-size: 1rem; }
+input[type='checkbox'], input[type='radio'] { width: 20px; height: 20px; accent-color: var(--color-marca); flex-shrink: 0; }
+input::placeholder, textarea::placeholder { color: var(--color-secundario); opacity: 1; }
+button:disabled { cursor: wait; }
+/* Shared form surfaces keep every tool readable and operable at narrow widths. */
+.app :is(.consulta-panel, .viaje-panel, .operacion-panel, .fila-panel, .rendimiento-panel) { box-shadow: var(--sombra-suave); border-radius: var(--espacio-6); }
+.app :is(.consulta-panel, .viaje-panel, .operacion-panel, .fila-panel, .rendimiento-panel) > h2 { margin-bottom: var(--espacio-3); }
+.app :is(input:not([type='checkbox']):not([type='radio']), select, textarea) { border-color: var(--color-control); min-height: 48px; border-radius: var(--espacio-2); padding: var(--espacio-3); }
+.app :is(button, .app-subnav a) { min-height: 44px; }
+.app-marca, .app-pie-marca { min-height: 44px; }
+.app :is(.consulta-form, .viaje-form) label { flex: 1 1 12rem; }
+.app :is(.consulta-form, .viaje-form, .operacion-form, .fila-form, .rendimiento-form) button { min-height: 48px; font-weight: 650; }
+.app :is(.consulta-resultado, .viaje-resultado) ol { padding-left: var(--espacio-6); }
+.app :is(.consulta-resultado, .viaje-resultado) li { padding: var(--espacio-2) 0; }
+.app :is(.rendimiento-tabla-contenedor, .fila-tabla-contenedor, .rendimiento-cuerpo, .rendimiento-grafica) { min-width: 0; max-width: 100%; }
+.app .fila-resumen { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  .app-simbolo, .app-cta, .app-acceso, .app-perfil summary, .app-perfil-panel, .app-perfil-panel button, .app-vista-actual, .app :is(input, button, select, textarea) { border: 1px solid ButtonText; }
+  .app-perfil-panel button[aria-pressed='true'] { outline: 2px solid Highlight; }
+  :focus-visible { outline: 3px solid Highlight; }
+}

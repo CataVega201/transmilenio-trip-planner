@@ -21,12 +21,12 @@ function Formulario({ modo, versionRed }) {
     consultar(acciones[modo])
   }
   const datos = salida?.datos
-  return <><form className="consulta-form" onSubmit={enviar}>
+  return <><form className="consulta-form" onSubmit={enviar} aria-label={opciones[modo]}>
     {(modo === 'estado' || modo === 'bus') && <Estacion etiqueta="Estación" nombre="estacion" versionRed={versionRed} />}
     {modo === 'bus' && <><label>Ruta<input name="ruta" required /></label><label>Hora del día de servicio<input name="hora" required placeholder="08:30" pattern="[0-9]{2,}:[0-5][0-9]" title="HH:MM, por ejemplo 25:10" /></label></>}
     {modo === 'rango' && <><label>Desde<input name="desde" required /></label><label>Hasta<input name="hasta" required /></label></>}
     {modo === 'ranking' && <label>Número de estaciones<input name="k" type="number" min="1" defaultValue="5" required /></label>}
-    <button>Consultar</button>
+    <button disabled={cargando}>Consultar</button>
   </form><div className="consulta-resultado" role="status">
     {cargando && 'Consultando…'}{salida?.error}
     {salida && !salida.error && <>
@@ -40,7 +40,8 @@ function Formulario({ modo, versionRed }) {
 
 export default function Consultas({ versionRed = 0 }) {
   const [modo, cambiar] = useState('estado')
-  return <section className="consulta-panel"><h2>Consultar la red</h2>
+  return <section className="consulta-panel" aria-labelledby="consultas-titulo"><h2 id="consultas-titulo">Consultar la red</h2>
+    <p className="herramienta-ayuda">Elige qué necesitas saber: el estado de una estación, tu próximo bus o las estaciones con más servicio.</p>
     <label className="consulta-selector">Tipo de consulta<select value={modo} onChange={e => cambiar(e.target.value)}>
       {Object.entries(opciones).map(([valor, texto]) => <option key={valor} value={valor}>{texto}</option>)}
     </select></label>
