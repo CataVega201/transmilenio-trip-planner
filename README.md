@@ -113,7 +113,8 @@ La configuración está en `render.yaml` y `produccion.py`.
 
 ## Vistas de cliente y operador
 
-El selector Cliente/Operador está en Herramientas de viaje. Cliente muestra
+El selector Cliente/Operador está en el menú «Tu vista», en la esquina superior
+derecha de la cabecera. Cliente muestra
 consultas y viajes. Operador añade edición de recorridos, cierres/reaperturas
 de estaciones, deshacer/rehacer, simulación y rendimiento. Los formularios y
 resultados se conservan al cambiar de vista. Es una selección de interfaz para
