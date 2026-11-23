@@ -9,6 +9,9 @@
   --color-borde: #dedfd7;
   --color-exito: #286344;
   --color-foco: #1859ad;
+  --color-control: #858b82;
+  --sombra-suave: 0 3px 18px #25262206;
+  --sombra-elevada: 0 16px 40px #25262214;
   --fuente: 'Segoe UI', system-ui, sans-serif;
   --espacio-1: 0.25rem;
   --espacio-2: 0.5rem;

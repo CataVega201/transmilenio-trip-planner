@@ -82,8 +82,9 @@ function Operacion({ grupo }) {
     <article className="rendimiento-operacion">
       <h3><span className="rendimiento-req">{grupo.requisito}</span> {grupo.operacion}</h3>
       <div className="rendimiento-cuerpo">
-        <div className="rendimiento-tabla-contenedor" tabIndex={0} aria-label={`Resultados de ${grupo.operacion}`}>
+        <div className="rendimiento-tabla-contenedor" role="region" tabIndex={0} aria-label={`Resultados de ${grupo.operacion}`}>
           <table className="rendimiento-tabla">
+            <caption className="solo-lectores">Resultados de {grupo.operacion} por tamaño de entrada</caption>
             <thead>
               <tr><th scope="col">n ({medidas[0]?.unidad})</th><th scope="col">Mediana</th><th scope="col">× anterior</th><th scope="col">Salida</th></tr>
             </thead>
